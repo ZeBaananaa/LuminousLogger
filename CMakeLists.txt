@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.30)
 
 # Define Project Name
-project(LuminousLogger)
+project(LuminousLogger VERSION 0.0.1 LANGUAGES CXX)
 
 # Create global variable (project-level) to store output directory
 set(LL_BIN_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
@@ -19,6 +19,11 @@ message("[${CMAKE_PROJECT_NAME}]: Output directory: ${LL_BIN_OUTPUT_DIR}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}")
+
+
+option(BUILD_SHARED_LIB "Build shared library" OFF)
+option(BUILD_STATIC_LIB "Build static library" OFF)
+option(BUILD_MODULE_LIB "Build module library" OFF)
 
 
 
@@ -46,8 +51,20 @@ endif()
 # Get all sources & headers using the custom python script
 include(sources.cmake)
 
-# Add all source files
-add_executable(${PROJECT_NAME} ${LL_SOURCES})
+
+# Defines how to build project
+if(BUILD_SHARED_LIB)
+    add_library(${PROJECT_NAME} SHARED ${LL_SOURCES})
+endif()
+
+if(BUILD_STATIC_LIB)
+    add_library(${PROJECT_NAME} STATIC ${LL_SOURCES})
+endif()
+
+if(BUILD_MODULE_LIB)
+    add_library(${PROJECT_NAME} MODULE ${LL_SOURCES})
+endif()
+
 
 # Add Include Directory
 target_include_directories(${PROJECT_NAME} PRIVATE "Code/Include" "Code/Interface")

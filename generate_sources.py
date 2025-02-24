@@ -6,7 +6,7 @@ header_dir = "Code/Include"
 output_file = "sources.cmake"
 
 # Get all .cpp and .hpp files
-cpp_files: list[str] = []
+cpp_files: [str] = []
 cpp_files.insert(0, main_file)
 
 for dp, dn, filenames in os.walk(source_dir):
@@ -14,7 +14,7 @@ for dp, dn, filenames in os.walk(source_dir):
         if f.endswith(".cpp"):
             cpp_files.append(os.path.join(dp, f).replace("\\", "/"))
 
-hpp_files: list[str] = []
+hpp_files: [str] = []
 for dp, dn, filenames in os.walk(header_dir):
     for f in filenames:
         if f.endswith(".hpp"):
