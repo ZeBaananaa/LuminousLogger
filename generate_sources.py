@@ -21,7 +21,7 @@ for dp, dn, filenames in os.walk(header_dir):
             hpp_files.append(os.path.join(dp, f).replace("\\", "/"))
 
 # Converts path to cmake format
-cpp_list = "\n    ". join(cpp_files)
+cpp_list = "\n    ".join(cpp_files)
 hpp_list = "\n    ".join(hpp_files)
 
 # Write inside the `sources.cmake` file
