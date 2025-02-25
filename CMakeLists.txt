@@ -6,9 +6,8 @@
 cmake_minimum_required(VERSION 3.30)
 
 # Define Project Name
-project(
-        LuminousLogger
-        VERSION 1.0
+project(LuminousLogger
+        VERSION 1.0.0
         LANGUAGES CXX)
 
 # Create global variable (project-level) to store output directory
@@ -23,9 +22,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}")
 
-option(BUILD_SHARED_LIB "Build shared library" ON)
+option(BUILD_DEBUG_MODE "Build in debug mode" ON)
+option(BUILD_SHARED_LIB "Build shared library" OFF)
 option(BUILD_STATIC_LIB "Build static library" OFF)
 option(BUILD_MODULE_LIB "Build module library" OFF)
+
+
 
 # --------------------------------------- #
 #        AUTO-GENERATE SOURCES FILE       #
@@ -40,7 +42,8 @@ execute_process(
 # Ensure script ran with success
 if (NOT SCRIPT_EXIT_CODE EQUAL 0)
     message(FATAL_ERROR "Error while running generate_sources.py")
-endif ()
+endif()
+
 
 
 # --------------------------------------- #
@@ -50,39 +53,34 @@ endif ()
 # Get all sources & headers using the custom python script
 include(sources.cmake)
 
-add_executable(${PROJECT_NAME} ${LL_SOURCES})
 
 # Defines how to build project
-#[[if (BUILD_SHARED_LIB)
+if(BUILD_DEBUG_MODE)
+    add_executable(${PROJECT_NAME} ${LL_SOURCES})
+endif()
+
+if(BUILD_SHARED_LIB)
     add_library(${PROJECT_NAME} SHARED ${LL_SOURCES})
-endif ()]]
+endif()
 
-if (BUILD_STATIC_LIB)
+if(BUILD_STATIC_LIB)
     add_library(${PROJECT_NAME} STATIC ${LL_SOURCES})
-endif ()
+endif()
 
-if (BUILD_MODULE_LIB)
+if(BUILD_MODULE_LIB)
     add_library(${PROJECT_NAME} MODULE ${LL_SOURCES})
-endif ()
+endif()
 
 
-if (NOT LL_SOURCES)
-    message(FATAL_ERROR "LL_SOURCES is empty. Check generate_sources.py and sources.cmake.")
-endif ()
+# Add Include Directory
+target_include_directories(${PROJECT_NAME} PRIVATE "Code/Include" "Code/Interface")
 
-if (TARGET ${PROJECT_NAME})
-    # Add Include Directory
-    target_include_directories(${PROJECT_NAME} PRIVATE "Code/Include" "Code/Interface")
+# Define C++ Standard Version
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-    # Define C++ Standard Version
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-
-    # Set Warning level 4 and warnings as errors flags
-    if (MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-    else ()
-        target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-    endif ()
+# Set Warning level 4 and warnings as errors flags
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 else ()
-    message(FATAL_ERROR "Target ${PROJECT_NAME} was not created. Verify LL_SOURCES and build options.")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif ()
