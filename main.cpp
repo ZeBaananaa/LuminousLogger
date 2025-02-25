@@ -2,23 +2,23 @@
 
 int main()
 {
-    Debug::Logger& m_logger = Debug::Logger::GetInstance();
-    m_logger.SetLogFile("app.log");
-    m_logger.SetLogLevel(Debug::LogLevel::VERBOSE);
+    Debug::Logger& l_logger = Debug::Logger::GetInstance();
+    l_logger.SetLogFile("app.log");
+    l_logger.SetLogLevel(Debug::LogLevel::VERBOSE);
 
-    m_logger.LogDebug("Test Debug Message!");
-    m_logger.LogInfo("Application is running");
-    m_logger.LogWarning("Test Warning Message");
-    m_logger.LogError("Test Error Message");
-    m_logger.LogCritical("Test Critical Message");
-    m_logger.Log(Debug::LogLevel::VERBOSE, 1);
-    m_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
+    l_logger.LogDebug("Test Debug Message!");
+    l_logger.LogInfo("Application is running");
+    l_logger.LogWarning("Test Warning Message");
+    l_logger.LogError("Test Error Message");
+    l_logger.LogCritical("Test Critical Message");
+    l_logger.Log(Debug::LogLevel::VERBOSE, 1);
+    l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
     double test = 1.2564484861878545;
-    m_logger.Log(Debug::LogLevel::VERBOSE, test);
+    l_logger.Log(Debug::LogLevel::VERBOSE, test);
     float t = 0.155654986465465f;
     bool b = false;
-    m_logger.Log(Debug::LogLevel::VERBOSE, b);
-    m_logger.Log(Debug::LogLevel::VERBOSE, t);
+    l_logger.Log(Debug::LogLevel::VERBOSE, b);
+    l_logger.Log(Debug::LogLevel::VERBOSE, t);
 
     return 0;
 }
