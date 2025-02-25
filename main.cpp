@@ -19,6 +19,9 @@ int main()
     bool b = false;
     l_logger.Log(Debug::LogLevel::VERBOSE, b);
     l_logger.Log(Debug::LogLevel::VERBOSE, t);
+    l_logger.LogCritical("Test Critical Message");
 
+    // TODO : Remove in order to allow program to close properly
+    getchar();
     return 0;
 }
