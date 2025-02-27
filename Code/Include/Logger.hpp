@@ -19,19 +19,19 @@ namespace Debug
         void SetLogFile(const std::string& a_filename);
 
         template <typename LogMessage>
-        void LogDebug(const LogMessage& a_message = "Empty Message");
+        void LogDebug(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogInfo(const LogMessage& a_message = "Empty Message");
+        void LogInfo(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogWarning(const LogMessage& a_message = "Empty Message");
+        void LogWarning(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogError(const LogMessage& a_message = "Empty Message");
+        void LogError(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogCritical(const LogMessage& a_message = "Empty Message");
+        void LogCritical(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
         void Log(const LogLevel& a_level = LogLevel::VERBOSE, const LogMessage& a_message = "Empty Message",

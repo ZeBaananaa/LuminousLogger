@@ -47,7 +47,7 @@ namespace Debug
 
         std::lock_guard l_lock(m_logMutex);
         const std::string l_formattedMsg =
-            FormatMessage(a_level, ToString(a_message));
+            FormatMessage(a_level, ToString(a_message), a_location);
 
         std::cout << l_formattedMsg << "\n";
 
@@ -56,32 +56,32 @@ namespace Debug
     }
 
     template <typename LogMessage>
-    void Logger::LogDebug(const LogMessage& a_message)
+    void Logger::LogDebug(const LogMessage& a_message, const std::source_location& a_location)
     {
-        Log(LogLevel::VERBOSE, a_message);
+        Log(LogLevel::VERBOSE, a_message, a_location);
     }
 
     template <typename LogMessage>
-    void Logger::LogInfo(const LogMessage& a_message)
+    void Logger::LogInfo(const LogMessage& a_message, const std::source_location& a_location)
     {
-        Log(LogLevel::INFO, a_message);
+        Log(LogLevel::INFO, a_message, a_location);
     }
 
     template <typename LogMessage>
-    void Logger::LogWarning(const LogMessage& a_message)
+    void Logger::LogWarning(const LogMessage& a_message, const std::source_location& a_location)
     {
-        Log(LogLevel::WARNING, a_message);
+        Log(LogLevel::WARNING, a_message, a_location);
     }
 
     template <typename LogMessage>
-    void Logger::LogError(const LogMessage& a_message)
+    void Logger::LogError(const LogMessage& a_message, const std::source_location& a_location)
     {
-        Log(LogLevel::ERROR, a_message);
+        Log(LogLevel::ERROR, a_message, a_location);
     }
 
     template <typename LogMessage>
-    void Logger::LogCritical(const LogMessage& a_message)
+    void Logger::LogCritical(const LogMessage& a_message, const std::source_location& a_location)
     {
-        Log(LogLevel::CRITICAL, a_message);
+        Log(LogLevel::CRITICAL, a_message, a_location);
     }
 } // namespace Debug
