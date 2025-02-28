@@ -1,11 +1,9 @@
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
 
 #include <fstream>
 #include <mutex>
 #include <source_location>
 
-#include "LogColor.hpp"
 #include "LogLevel.hpp"
 
 namespace Debug
@@ -19,19 +17,24 @@ namespace Debug
         void SetLogFile(const std::string& a_filename);
 
         template <typename LogMessage>
-        void LogDebug(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
+        void LogDebug(const LogMessage& a_message = "Empty Message",
+                      const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogInfo(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
+        void LogInfo(const LogMessage& a_message = "Empty Message",
+                     const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogWarning(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
+        void LogWarning(const LogMessage& a_message = "Empty Message",
+                        const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogError(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
+        void LogError(const LogMessage& a_message = "Empty Message",
+                      const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
-        void LogCritical(const LogMessage& a_message = "Empty Message", const std::source_location& a_location = std::source_location::current());
+        void LogCritical(const LogMessage& a_message = "Empty Message",
+                         const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>
         void Log(const LogLevel& a_level = LogLevel::VERBOSE, const LogMessage& a_message = "Empty Message",
@@ -53,4 +56,3 @@ namespace Debug
 }
 
 #include "Logger.tpp"
-#endif

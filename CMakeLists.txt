@@ -34,7 +34,6 @@ option(BUILD_MODULE_LIB "Build module library" OFF)
 # --------------------------------------- #
 
 file(GLOB_RECURSE LL_SOURCES "main.cpp" "Code/Src/*.cpp")
-file(GLOB_RECURSE LL_HEADERS "Code/Include/*.hpp")
 
 # --------------------------------------- #
 #         SOURCE & HEADER INCLUDES        #
@@ -59,7 +58,7 @@ endif()
 
 
 # Add Include Directory
-target_include_directories(${PROJECT_NAME} PRIVATE ${LL_HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC "Code/Include")
 
 # Define C++ Standard Version
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

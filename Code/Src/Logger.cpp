@@ -3,9 +3,9 @@
 #include <iomanip>
 #include <sstream>
 
-#if !defined PROJECT_FOLDER
-#define PROJECT_FOLDER "LuminousLogger/"
-#endif
+#include "LogColor.hpp"
+
+constexpr std::string PROJECT_FOLDER { "LuminousLogger/" };
 
 namespace Debug
 {

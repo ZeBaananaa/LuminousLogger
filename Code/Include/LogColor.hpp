@@ -1,5 +1,4 @@
-#ifndef LOGCOLOR_HPP
-#define LOGCOLOR_HPP
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -52,5 +51,3 @@ namespace Debug
 
     const std::string ResetColor(ColorMap.at(ColorEnum::RESET));
 }
-
-#endif //LOGCOLOR_HPP
