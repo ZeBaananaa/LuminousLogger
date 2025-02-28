@@ -33,26 +33,12 @@ option(BUILD_MODULE_LIB "Build module library" OFF)
 #        AUTO-GENERATE SOURCES FILE       #
 # --------------------------------------- #
 
-execute_process(
-        COMMAND python ${CMAKE_SOURCE_DIR}/generate_sources.py
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE SCRIPT_EXIT_CODE
-)
-
-# Ensure script ran with success
-if (NOT SCRIPT_EXIT_CODE EQUAL 0)
-    message(FATAL_ERROR "Error while running generate_sources.py")
-endif()
-
-
+file(GLOB_RECURSE LL_SOURCES "main.cpp" "Code/Src/*.cpp")
+file(GLOB_RECURSE LL_HEADERS "Code/Include/*.hpp")
 
 # --------------------------------------- #
 #         SOURCE & HEADER INCLUDES        #
 # --------------------------------------- #
-
-# Get all sources & headers using the custom python script
-include(sources.cmake)
-
 
 # Defines how to build project
 if(BUILD_DEBUG_MODE)
@@ -73,7 +59,7 @@ endif()
 
 
 # Add Include Directory
-target_include_directories(${PROJECT_NAME} PRIVATE "Code/Include" "Code/Interface")
+target_include_directories(${PROJECT_NAME} PRIVATE ${LL_HEADERS})
 
 # Define C++ Standard Version
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
