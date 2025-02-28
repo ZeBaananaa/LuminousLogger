@@ -1,8 +1,11 @@
 #include "Logger.hpp"
 
-#include <iostream>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+
+#if !defined PROJECT_FOLDER
+#define PROJECT_FOLDER "LuminousLogger/"
+#endif
 
 namespace Debug
 {
@@ -36,7 +39,7 @@ namespace Debug
 
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
     {
-        constexpr std::string_view l_folder = "LuminousLogger/";
+        constexpr std::string_view l_folder = PROJECT_FOLDER;
         std::string_view l_filePath = a_location.file_name();
 
         if (const size_t l_pos = l_filePath.find(l_folder); l_pos != std::string_view::npos)
