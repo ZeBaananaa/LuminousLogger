@@ -13,27 +13,27 @@ namespace Debug
     }
 
     template <>
-    inline std::string ToString<std::string>(const std::string& a_value)
+    inline std::string ToString<std::string>(const std::string& a_message)
     {
-        return a_value;
+        return a_message;
     }
 
     template <>
-    inline std::string ToString(const bool& a_value)
+    inline std::string ToString(const bool& a_message)
     {
-        return a_value ? "true" : "false";
+        return a_message ? "true" : "false";
     }
 
     template <>
-    inline std::string ToString(const float& a_value)
+    inline std::string ToString(const float& a_message)
     {
-        return std::format("{}f", a_value);
+        return std::format("{}f", a_message);
     }
 
     template <>
-    inline std::string ToString(const double& a_value)
+    inline std::string ToString(const double& a_message)
     {
-        return std::format("{}", a_value);
+        return std::format("{}", a_message);
     }
 
     inline std::string ToString(const char* a_char) { return a_char; }
@@ -46,13 +46,13 @@ namespace Debug
             return;
 
         std::lock_guard l_lock(m_logMutex);
-        const std::string l_formattedMsg =
-            FormatMessage(a_level, ToString(a_message), a_location);
+        const std::string l_formattedConsoleMsg{FormatConsoleMessage(a_level, ToString(a_message), a_location)};
+        const std::string l_formattedLogFileMsg{FormatLogFileMessage(a_level, ToString(a_message), a_location)};
 
-        std::cout << l_formattedMsg << "\n";
+        std::cout << l_formattedConsoleMsg << "\n";
 
         if (m_logFile.is_open())
-            m_logFile << l_formattedMsg << "\n";
+            m_logFile << l_formattedLogFileMsg << "\n";
     }
 
     template <typename LogMessage>
@@ -84,4 +84,4 @@ namespace Debug
     {
         Log(LogLevel::CRITICAL, a_message, a_location);
     }
-} // namespace Debug
+}

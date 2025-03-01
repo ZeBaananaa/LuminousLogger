@@ -27,7 +27,7 @@ namespace Debug
         BOLD_WHITE,
     };
 
-    const std::unordered_map<ColorEnum, std::string> ColorMap =
+    static const std::unordered_map<ColorEnum, std::string> ColorMap =
     {
         {ColorEnum::RESET, "\033[0m"},
         {ColorEnum::BLACK, "\033[30m"},
@@ -49,5 +49,5 @@ namespace Debug
         {ColorEnum::BOLD_WHITE, "\033[1m\033[97m"}
     };
 
-    const std::string ResetColor(ColorMap.at(ColorEnum::RESET));
+    static const std::string ResetColor(ColorMap.at(ColorEnum::RESET));
 }
