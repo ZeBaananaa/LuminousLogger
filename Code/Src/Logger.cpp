@@ -13,6 +13,10 @@ constexpr std::string OLD_FILE_TEXT{".old"};
 
 namespace Debug
 {
+    /**
+     * @brief Function to get the instance of the logger
+     * @return The instance of the logger. Useful to print messages
+     */
     Logger& Logger::GetInstance()
     {
         static Logger s_instance{};
@@ -25,12 +29,12 @@ namespace Debug
             m_logFile.close();
     }
 
-    void Logger::SetLogLevel(const LogLevel& a_level)
-    {
-        std::lock_guard l_lock(m_logMutex);
-        m_minLogLevel = a_level;
-    }
-
+    /**
+     * @brief
+     * @param a_filename Defines a custom name for log files. Do not specify the extension as all files are saved as .log
+     * @param a_maxFileSize Defines the max size before rotating towards a new log file
+     * @param a_maxFiles Defines the max amount of log files before deleting the oldest log file
+     */
     void Logger::SetLogFile(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles)
     {
         std::lock_guard l_lock(m_logMutex);
@@ -44,6 +48,9 @@ namespace Debug
             LogError("File " + m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT + " could not be opened!" + "\n");
     }
 
+    /**
+     * @brief Helper function to trigger log file rotaiton
+     */
     void Logger::RotateLogs()
     {
         m_logFile.close();
@@ -59,6 +66,9 @@ namespace Debug
         m_logFile.open(m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT, std::ios::trunc);
     }
 
+    /**
+     * @brief Helper function to check the log file size in order to trigger rotation
+     */
     void Logger::CheckLogFileSize()
     {
         if (std::filesystem::exists(m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT) &&
@@ -66,6 +76,11 @@ namespace Debug
             RotateLogs();
     }
 
+    /**
+     * @brief Helper function to retrieve the log message source location.
+     * @param a_location The location to show in the debug message
+     * @return Either the specified location, or, in not specified, the location of the log message
+     */
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
     {
         constexpr std::string_view l_folder{PROJECT_FOLDER};
@@ -77,6 +92,13 @@ namespace Debug
         return std::format("{} ({}:{})", l_filePath, a_location.line(), a_location.column());
     }
 
+    /**
+     * @brief Helper function to format message for console printing (With color support)
+     * @param a_level The log level
+     * @param a_message The log message
+     * @param a_location The location to show in the debug message
+     * @return A formatted message with colors
+     */
     std::string Logger::FormatConsoleMessage(const LogLevel& a_level, const std::string& a_message,
                                              const std::source_location& a_location = std::source_location::current())
     {
@@ -91,6 +113,13 @@ namespace Debug
                            ColorMap.at(ColorEnum::RESET));
     }
 
+    /**
+     * @brief Helper function to format message for log file printing (With no colors)
+     * @param a_level The log level
+     * @param a_message The log message
+     * @param a_location The location to show in the debug message
+     * @return A formatted message with no colors for log printing in file
+     */
     std::string Logger::FormatLogFileMessage(const LogLevel& a_level, const std::string& a_message,
                                              const std::source_location& a_location = std::source_location::current())
     {

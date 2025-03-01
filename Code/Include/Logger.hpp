@@ -15,12 +15,10 @@ namespace Debug
     {
     public:
         static Logger& GetInstance();
-
-        void SetLogLevel(const LogLevel& a_level);
         void SetLogFile(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles);
 
         template <typename LogMessage>
-        void LogDebug(const LogMessage& a_message = "Empty Message",
+        void LogVerbose(const LogMessage& a_message = "Empty Message",
                       const std::source_location& a_location = std::source_location::current());
 
         template <typename LogMessage>

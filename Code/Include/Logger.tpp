@@ -56,7 +56,7 @@ namespace Debug
     }
 
     template <typename LogMessage>
-    void Logger::LogDebug(const LogMessage& a_message, const std::source_location& a_location)
+    void Logger::LogVerbose(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::VERBOSE, a_message, a_location);
     }
