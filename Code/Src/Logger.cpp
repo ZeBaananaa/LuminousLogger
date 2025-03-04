@@ -13,10 +13,6 @@ constexpr std::string OLD_FILE_TEXT{".old"};
 
 namespace Debug
 {
-    /**
-     * @brief Function to get the instance of the logger
-     * @return The instance of the logger. Useful to print messages
-     */
     Logger& Logger::GetInstance()
     {
         static Logger s_instance{};
@@ -29,12 +25,6 @@ namespace Debug
             m_logFile.close();
     }
 
-    /**
-     * @brief
-     * @param a_filename Defines a custom name for log files. Do not specify the extension as all files are saved as .log
-     * @param a_maxFileSize Defines the max size before rotating towards a new log file
-     * @param a_maxFiles Defines the max amount of log files before deleting the oldest log file
-     */
     void Logger::SetLogFile(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles)
     {
         std::lock_guard l_lock(m_logMutex);
@@ -48,9 +38,6 @@ namespace Debug
             LogError("File " + m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT + " could not be opened!" + "\n");
     }
 
-    /**
-     * @brief Helper function to trigger log file rotaiton
-     */
     void Logger::RotateLogs()
     {
         m_logFile.close();
@@ -66,9 +53,6 @@ namespace Debug
         m_logFile.open(m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT, std::ios::trunc);
     }
 
-    /**
-     * @brief Helper function to check the log file size in order to trigger rotation
-     */
     void Logger::CheckLogFileSize()
     {
         if (std::filesystem::exists(m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT) &&
@@ -76,11 +60,6 @@ namespace Debug
             RotateLogs();
     }
 
-    /**
-     * @brief Helper function to retrieve the log message source location.
-     * @param a_location The location to show in the debug message
-     * @return Either the specified location, or, in not specified, the location of the log message
-     */
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
     {
         constexpr std::string_view l_folder{PROJECT_FOLDER};
@@ -92,36 +71,8 @@ namespace Debug
         return std::format("{} ({}:{})", l_filePath, a_location.line(), a_location.column());
     }
 
-    /**
-     * @brief Helper function to format message for console printing (With color support)
-     * @param a_level The log level
-     * @param a_message The log message
-     * @param a_location The location to show in the debug message
-     * @return A formatted message with colors
-     */
-    std::string Logger::FormatConsoleMessage(const LogLevel& a_level, const std::string& a_message,
-                                             const std::source_location& a_location = std::source_location::current())
-    {
-        const std::chrono::time_point<std::chrono::system_clock> l_now{std::chrono::system_clock::now()};
-        const time_t l_time{std::chrono::system_clock::to_time_t(l_now)};
-
-        std::ostringstream l_timeStr{};
-        l_timeStr << std::put_time(std::localtime(&l_time), "%Y-%m-%d %H:%M:%S");
-
-        return std::format("{} [ {} ] - [ {} ] : {}{}{}", ColoredLogLevelToString(a_level), l_timeStr.str(),
-                           GetSourceLocation(a_location), ColorMap.at(ColorEnum::BOLD_BLACK), a_message,
-                           ColorMap.at(ColorEnum::RESET));
-    }
-
-    /**
-     * @brief Helper function to format message for log file printing (With no colors)
-     * @param a_level The log level
-     * @param a_message The log message
-     * @param a_location The location to show in the debug message
-     * @return A formatted message with no colors for log printing in file
-     */
-    std::string Logger::FormatLogFileMessage(const LogLevel& a_level, const std::string& a_message,
-                                             const std::source_location& a_location = std::source_location::current())
+    std::string Logger::FormatMessage(const LogLevel& a_level, const std::string& a_message, const bool& a_useColor,
+                                      const std::source_location& a_location)
     {
         const std::chrono::time_point l_now{std::chrono::system_clock::now()};
         const time_t l_time{std::chrono::system_clock::to_time_t(l_now)};
@@ -129,12 +80,39 @@ namespace Debug
         std::ostringstream l_timeStr{};
         l_timeStr << std::put_time(std::localtime(&l_time), "%Y-%m-%d %H:%M:%S");
 
-        return std::format("{} [ {} ] - [ {} ] : {}", LogLevelToString(a_level), l_timeStr.str(),
+        if (a_useColor)
+            return std::format("{} [ {} ] - [ {} ] : {}{}{}", LogLevelToString(a_level, true), l_timeStr.str(),
+                               GetSourceLocation(a_location), ColorMap.at(ColorEnum::BOLD_BLACK), a_message,
+                               ColorMap.at(ColorEnum::RESET));
+
+        return std::format("{} [ {} ] - [ {} ] : {}", LogLevelToString(a_level, false), l_timeStr.str(),
                            GetSourceLocation(a_location), a_message);
     }
 
-    std::string Logger::LogLevelToString(const LogLevel& a_level)
+    std::string Logger::LogLevelToString(const LogLevel& a_level, const bool& a_useColor)
     {
+        if (a_useColor)
+            switch (a_level)
+            {
+            case LogLevel::VERBOSE:
+                return std::format("{}VERBOSE{}    :", ColorMap.at(ColorEnum::BOLD_BLUE), ResetColor);
+
+            case LogLevel::INFO:
+                return std::format("{}INFO{}       :", ColorMap.at(ColorEnum::BOLD_GREEN), ResetColor);
+
+            case LogLevel::WARNING:
+                return std::format("{}WARNING{}    :", ColorMap.at(ColorEnum::BOLD_YELLOW), ResetColor);
+
+            case LogLevel::ERROR:
+                return std::format("{}ERROR{}      :", ColorMap.at(ColorEnum::BOLD_RED), ResetColor);
+
+            case LogLevel::CRITICAL:
+                return std::format("{}CRITICAL{}   :", ColorMap.at(ColorEnum::BOLD_MAGENTA), ResetColor);
+
+            default:
+                return std::format("{}UNSPECIFIED{}    :", ColorMap.at(ColorEnum::BOLD_WHITE), ResetColor);
+            }
+
         switch (a_level)
         {
         case LogLevel::VERBOSE:
@@ -154,30 +132,6 @@ namespace Debug
 
         default:
             return std::format("UNSPECIFIED    :");
-        }
-    }
-
-    std::string Logger::ColoredLogLevelToString(const LogLevel& a_level)
-    {
-        switch (a_level)
-        {
-        case LogLevel::VERBOSE:
-            return std::format("{}VERBOSE{}    :", ColorMap.at(ColorEnum::BOLD_BLUE), ResetColor);
-
-        case LogLevel::INFO:
-            return std::format("{}INFO{}       :", ColorMap.at(ColorEnum::BOLD_GREEN), ResetColor);
-
-        case LogLevel::WARNING:
-            return std::format("{}WARNING{}    :", ColorMap.at(ColorEnum::BOLD_YELLOW), ResetColor);
-
-        case LogLevel::ERROR:
-            return std::format("{}ERROR{}      :", ColorMap.at(ColorEnum::BOLD_RED), ResetColor);
-
-        case LogLevel::CRITICAL:
-            return std::format("{}CRITICAL{}   :", ColorMap.at(ColorEnum::BOLD_MAGENTA), ResetColor);
-
-        default:
-            return std::format("{}UNSPECIFIED{}    :", ColorMap.at(ColorEnum::BOLD_WHITE), ResetColor);
         }
     }
 }

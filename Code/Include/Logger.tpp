@@ -46,8 +46,8 @@ namespace Debug
             return;
 
         std::lock_guard l_lock(m_logMutex);
-        const std::string l_formattedConsoleMsg{FormatConsoleMessage(a_level, ToString(a_message), a_location)};
-        const std::string l_formattedLogFileMsg{FormatLogFileMessage(a_level, ToString(a_message), a_location)};
+        const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
+        const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
 
         std::cout << l_formattedConsoleMsg << "\n";
 
