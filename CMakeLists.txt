@@ -18,6 +18,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}/Libs")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}/Libs")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}")
 
+# To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 
 #---------------------------------------#
 #                SOURCES                #
@@ -64,21 +67,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #---------------------------------------#
 target_compile_definitions(L_LOGGER PRIVATE LUMINOUS_LOGGER_EXPORTS)
 
+# Disable lib prefix
+set_target_properties(L_LOGGER PROPERTIES PREFIX "")
 
-# --------------------------------------- #
-#             CREATE OPTIONS              #
-# --------------------------------------- #
-
-option(L_LOGGER_TESTING "Enable Unit Tests" OFF)
+# Set dll name
+set_target_properties(L_LOGGER PROPERTIES OUTPUT_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
 
 
-# --------------------------------------- #
-#              ENABLE TESTING             #
-# --------------------------------------- #
 
-# Enable CTests
-enable_testing()
-
-if (L_LOGGER_TESTING)
-    add_subdirectory(Test)
-endif ()
+add_subdirectory(Test)
