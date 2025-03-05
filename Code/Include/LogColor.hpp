@@ -3,13 +3,15 @@
 #include <string>
 #include <unordered_map>
 
+#include "LogLevel.hpp"
+
 namespace Debug
 {
     enum class ColorEnum : int
     {
         RESET = 0,
         BLACK,
-        RED ,
+        RED,
         GREEN,
         YELLOW,
         BLUE,
@@ -47,6 +49,15 @@ namespace Debug
         {ColorEnum::BOLD_MAGENTA, "\033[1m\033[95m"},
         {ColorEnum::BOLD_CYAN, "\033[1m\033[96m"},
         {ColorEnum::BOLD_WHITE, "\033[1m\033[97m"}
+    };
+
+    static const std::unordered_map<LogLevel, std::string> s_LogLevelColor =
+    {
+        {LogLevel::VERBOSE, ColorMap.at(ColorEnum::BOLD_BLUE)},
+        {LogLevel::INFO, ColorMap.at(ColorEnum::BOLD_GREEN)},
+        {LogLevel::WARNING, ColorMap.at(ColorEnum::BOLD_YELLOW)},
+        {LogLevel::ERROR, ColorMap.at(ColorEnum::BOLD_MAGENTA)},
+        {LogLevel::CRITICAL, ColorMap.at(ColorEnum::BOLD_RED)}
     };
 
     static const std::string ResetColor(ColorMap.at(ColorEnum::RESET));

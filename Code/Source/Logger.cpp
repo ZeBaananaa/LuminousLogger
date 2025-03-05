@@ -25,17 +25,19 @@ namespace Debug
             m_logFile.close();
     }
 
-    void Logger::SetLogFile(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles)
+    void Logger::Init(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles, const bool& a_useColors)
     {
         std::lock_guard l_lock(m_logMutex);
         m_logFilename = a_filename;
         m_maxFileSize = a_maxFileSize;
         m_maxFiles = a_maxFiles;
+        m_useColors = a_useColors;
 
-        m_logFile.open(a_filename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT, std::ios::app);
+        m_logFile.open(a_filename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT, std::ios::out | std::ios::app);
 
         if (!m_logFile.is_open())
-            LogError("File " + m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT + " could not be opened!" + "\n");
+            std::cerr << "File " + m_logFilename + LATEST_LOG_FILE_NAME + LOG_FILE_FORMAT + " could not be opened!" +
+                    "\n";
     }
 
     void Logger::RotateLogs()
@@ -71,7 +73,7 @@ namespace Debug
         return std::format("{} ({}:{})", l_filePath, a_location.line(), a_location.column());
     }
 
-    std::string Logger::FormatMessage(const LogLevel& a_level, const std::string& a_message, const bool& a_useColor,
+    std::string Logger::FormatMessage(const LogLevel& a_level, const std::string& a_message, const bool& a_useColors,
                                       const std::source_location& a_location)
     {
         const std::chrono::time_point l_now{std::chrono::system_clock::now()};
@@ -80,58 +82,32 @@ namespace Debug
         std::ostringstream l_timeStr{};
         l_timeStr << std::put_time(std::localtime(&l_time), "%Y-%m-%d %H:%M:%S");
 
-        if (a_useColor)
+        if (m_useColors && a_useColors)
             return std::format("{} [ {} ] - [ {} ] : {}{}{}", LogLevelToString(a_level, true), l_timeStr.str(),
-                               GetSourceLocation(a_location), ColorMap.at(ColorEnum::BOLD_BLACK), a_message,
+                               GetSourceLocation(a_location), s_LogLevelColor.at(a_level), a_message,
                                ColorMap.at(ColorEnum::RESET));
 
         return std::format("{} [ {} ] - [ {} ] : {}", LogLevelToString(a_level, false), l_timeStr.str(),
                            GetSourceLocation(a_location), a_message);
     }
 
-    std::string Logger::LogLevelToString(const LogLevel& a_level, const bool& a_useColor)
+    std::string Logger::LogLevelToString(const LogLevel& a_level, const bool& a_useColors)
     {
-        if (a_useColor)
-            switch (a_level)
-            {
-            case LogLevel::VERBOSE:
-                return std::format("{}VERBOSE{}    :", ColorMap.at(ColorEnum::BOLD_BLUE), ResetColor);
-
-            case LogLevel::INFO:
-                return std::format("{}INFO{}       :", ColorMap.at(ColorEnum::BOLD_GREEN), ResetColor);
-
-            case LogLevel::WARNING:
-                return std::format("{}WARNING{}    :", ColorMap.at(ColorEnum::BOLD_YELLOW), ResetColor);
-
-            case LogLevel::ERROR:
-                return std::format("{}ERROR{}      :", ColorMap.at(ColorEnum::BOLD_RED), ResetColor);
-
-            case LogLevel::CRITICAL:
-                return std::format("{}CRITICAL{}   :", ColorMap.at(ColorEnum::BOLD_MAGENTA), ResetColor);
-
-            default:
-                return std::format("{}UNSPECIFIED{}    :", ColorMap.at(ColorEnum::BOLD_WHITE), ResetColor);
-            }
-
-        switch (a_level)
+        const std::unordered_map<LogLevel, std::string> l_logLevelStrings
         {
-        case LogLevel::VERBOSE:
-            return std::format("VERBOSE    :");
+            {LogLevel::VERBOSE, "VERBOSE    "},
+            {LogLevel::INFO, "INFO       "},
+            {LogLevel::WARNING, "WARNING    "},
+            {LogLevel::ERROR, "ERROR      "},
+            {LogLevel::CRITICAL, "CRITICAL   "}
+        };
 
-        case LogLevel::INFO:
-            return std::format("INFO       :");
+        const auto l_it = l_logLevelStrings.find(a_level);
+        std::string l_logString = l_it != l_logLevelStrings.end() ? l_it->second : "UNSPECIFIED    ";
 
-        case LogLevel::WARNING:
-            return std::format("WARNING    :");
+        if (m_useColors && a_useColors)
+            return std::format("{}{} : {}", s_LogLevelColor.at(a_level), l_logString, ResetColor);
 
-        case LogLevel::ERROR:
-            return std::format("ERROR      :");
-
-        case LogLevel::CRITICAL:
-            return std::format("CRITICAL   :");
-
-        default:
-            return std::format("UNSPECIFIED    :");
-        }
+        return l_logString;
     }
 }

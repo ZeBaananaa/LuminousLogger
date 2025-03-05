@@ -3,69 +3,82 @@
 # --------------------------------------- #
 
 # Define minimum CMake version required
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
         VERSION 1.0.0
         LANGUAGES CXX)
 
-# Create global variable (project-level) to store output directory
-set(LL_BIN_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/Build/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
+# Define output build folder
+set(LL_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/Builds/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
 
-# Log directory at configuration-time
-message("[${CMAKE_PROJECT_NAME}]: Output directory: ${LL_BIN_OUTPUT_DIR}")
-
-# Set output directory for compiled libs and exe (project-level)
-# MUST BE CALLED BEFORE `add_executables(...)` & `add_library(...)`
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}/Libs")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LL_BIN_OUTPUT_DIR}")
-
-option(BUILD_DEBUG_MODE "Build in debug mode" ON)
-option(BUILD_SHARED_LIB "Build shared library" OFF)
-option(BUILD_STATIC_LIB "Build static library" OFF)
-option(BUILD_MODULE_LIB "Build module library" OFF)
+# Define Output Build path for libraries & executable
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}/Libs")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}/Libs")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}")
 
 
-
-# --------------------------------------- #
-#        AUTO-GENERATE SOURCES FILE       #
-# --------------------------------------- #
-
-file(GLOB_RECURSE LL_SOURCES "main.cpp" "Code/Src/*.cpp")
-
-# --------------------------------------- #
-#         SOURCE & HEADER INCLUDES        #
-# --------------------------------------- #
-
-# Defines how to build project
-if(BUILD_DEBUG_MODE)
-    add_executable(${PROJECT_NAME} ${LL_SOURCES})
-endif()
-
-if(BUILD_SHARED_LIB)
-    add_library(${PROJECT_NAME} SHARED ${LL_SOURCES})
-endif()
-
-if(BUILD_STATIC_LIB)
-    add_library(${PROJECT_NAME} STATIC ${LL_SOURCES})
-endif()
-
-if(BUILD_MODULE_LIB)
-    add_library(${PROJECT_NAME} MODULE ${LL_SOURCES})
-endif()
+#---------------------------------------#
+#                SOURCES                #
+#---------------------------------------#
+file(GLOB_RECURSE L_LOGGER_SOURCES "Code/*.cpp")
 
 
-# Add Include Directory
-target_include_directories(${PROJECT_NAME} PUBLIC "Code/Include")
+#---------------------------------------#
+#            BUILD MODE                 #
+#---------------------------------------#
+add_library(L_LOGGER SHARED ${L_LOGGER_SOURCES})
 
-# Define C++ Standard Version
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-# Set Warning level 4 and warnings as errors flags
+#---------------------------------------#
+#                INCLUDE                #
+#---------------------------------------#
+target_include_directories(L_LOGGER PUBLIC "Code/Include")
+
+
+#---------------------------------------#
+#                COMPILE MODE           #
+#---------------------------------------#
+target_compile_features(L_LOGGER PUBLIC cxx_std_20)
+
 if (MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+    target_compile_options(L_LOGGER PUBLIC /W4 /WX)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(L_LOGGER PUBLIC -Wall -Wextra -Wpedantic -Werror)
+endif ()
+
+# To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+# Build position independent code.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Disable C and C++ compiler extensions.
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+#---------------------------------------#
+#        EXPORTS / IMPORTS FOR DLL      #
+#---------------------------------------#
+target_compile_definitions(L_LOGGER PRIVATE LUMINOUS_LOGGER_EXPORTS)
+
+
+# --------------------------------------- #
+#             CREATE OPTIONS              #
+# --------------------------------------- #
+
+option(L_LOGGER_TESTING "Enable Unit Tests" OFF)
+
+
+# --------------------------------------- #
+#              ENABLE TESTING             #
+# --------------------------------------- #
+
+# Enable CTests
+enable_testing()
+
+if (L_LOGGER_TESTING)
+    add_subdirectory(Test)
 endif ()

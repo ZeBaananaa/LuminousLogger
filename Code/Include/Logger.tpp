@@ -6,31 +6,31 @@
 
 namespace Debug
 {
-    template <typename LogMessage>
+    template<typename LogMessage>
     std::string ToString(const LogMessage& a_message)
     {
         return std::to_string(a_message);
     }
 
-    template <>
+    template<>
     inline std::string ToString<std::string>(const std::string& a_message)
     {
         return a_message;
     }
 
-    template <>
+    template<>
     inline std::string ToString(const bool& a_message)
     {
         return a_message ? "true" : "false";
     }
 
-    template <>
+    template<>
     inline std::string ToString(const float& a_message)
     {
         return std::format("{}f", a_message);
     }
 
-    template <>
+    template<>
     inline std::string ToString(const double& a_message)
     {
         return std::format("{}", a_message);
@@ -38,7 +38,7 @@ namespace Debug
 
     inline std::string ToString(const char* a_char) { return a_char; }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::Log(const LogLevel& a_level, const LogMessage& a_message,
                      const std::source_location& a_location)
     {
@@ -55,31 +55,31 @@ namespace Debug
             m_logFile << l_formattedLogFileMsg << "\n";
     }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::LogVerbose(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::VERBOSE, a_message, a_location);
     }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::LogInfo(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::INFO, a_message, a_location);
     }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::LogWarning(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::WARNING, a_message, a_location);
     }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::LogError(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::ERROR, a_message, a_location);
     }
 
-    template <typename LogMessage>
+    template<typename LogMessage>
     void Logger::LogCritical(const LogMessage& a_message, const std::source_location& a_location)
     {
         Log(LogLevel::CRITICAL, a_message, a_location);
