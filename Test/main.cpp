@@ -15,15 +15,15 @@ int main()
     bool b0 = true;
 
     DEBUG_LOG(Debug::LogLevel::CRITICAL, "Test, {} {} {}", b0, 50.f, 0.248558654);
-    //DEBUG_LOG_CRITICAL("test2");
+    DEBUG_LOG_CRITICAL("test2");
 
-    //l_logger.LogVerbose("Test Verbose Message!");
-    //l_logger.LogInfo("Application is running");
-    //l_logger.LogWarning("Test Warning Message");
-    //l_logger.LogError("Test Error Message");
-    //l_logger.LogCritical("Test Critical Message");
-    //l_logger.Log(Debug::LogLevel::VERBOSE, 1);
-    //l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
+    l_logger.LogVerbose("Test Verbose Message!");
+    l_logger.LogInfo("Application is running");
+    l_logger.LogWarning("Test Warning Message");
+    l_logger.LogError("Test Error Message");
+    l_logger.LogCritical("Test Critical Message");
+    l_logger.Log(Debug::LogLevel::VERBOSE, 1);
+    l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
 
     /*double test{1.2564484861878545};
     l_logger.Log(Debug::LogLevel::VERBOSE, test);

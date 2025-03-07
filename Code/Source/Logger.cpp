@@ -78,7 +78,8 @@ namespace Debug
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
 
-    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location, const std::string& a_message)
+    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location,
+                             const std::string& a_message)
     {
         std::lock_guard l_lock(m_logMutex);
         const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
@@ -142,7 +143,7 @@ namespace Debug
         if (const size_t l_pos{l_filePath.find(PROJECT_FOLDER)}; l_pos != std::string_view::npos)
             l_filePath.remove_prefix(l_pos + PROJECT_FOLDER.size());
 
-        return std::format("{} ({}:{})", l_filePath, a_location.line(), a_location.column());
+        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(), a_location.function_name());
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,

@@ -39,23 +39,33 @@ namespace Debug
          */
         void Init(const std::string& a_filename, size_t a_maxFileSize, size_t a_maxFiles, bool a_useColors);
 
-        template <typename... LogMessage>
-        void LogVerbose(std::string_view a_format, LogMessage&&... a_message);
+        struct FormatLocation
+        {
+            std::string_view format{};
+            std::source_location location{};
+
+            template <typename LogMessage>
+            FormatLocation(LogMessage&& a_logMessage, const std::source_location a_location = std::source_location::current()) :
+                format{std::forward<LogMessage>(a_logMessage)}, location{a_location}{}
+        };
 
         template <typename... LogMessage>
-        void LogInfo(std::string_view a_format, LogMessage&&... a_message);
+        void LogVerbose(FormatLocation a_formatLoc, LogMessage&&... a_message);
 
         template <typename... LogMessage>
-        void LogWarning(std::string_view a_format, LogMessage&&... a_message);
+        void LogInfo(FormatLocation a_formatLoc, LogMessage&&... a_message);
 
         template <typename... LogMessage>
-        void LogError(std::string_view a_format, LogMessage&&... a_message);
+        void LogWarning(FormatLocation a_formatLoc, LogMessage&&... a_message);
 
         template <typename... LogMessage>
-        void LogCritical(std::string_view a_format, LogMessage&&... a_message);
+        void LogError(FormatLocation a_formatLoc, LogMessage&&... a_message);
 
         template <typename... LogMessage>
-        void Log(LogLevel a_level, std::string_view a_format, LogMessage&&... a_message);
+        void LogCritical(FormatLocation a_formatLoc, LogMessage&&... a_message);
+
+        template <typename... LogMessage>
+        void Log(LogLevel a_level, FormatLocation a_formatLoc, LogMessage&&... a_message);
 
         void LogInternal(LogLevel a_level, const std::source_location& a_location, const std::string& a_message);
 

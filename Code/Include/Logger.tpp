@@ -39,38 +39,44 @@ namespace Debug
 
 
     template <typename... LogMessage>
-    void Logger::Log(const LogLevel a_level, const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::Log(const LogLevel a_level, const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(a_level, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(a_level, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 
     template <typename... LogMessage>
-    void Logger::LogVerbose(const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::LogVerbose(const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(LogLevel::VERBOSE, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(LogLevel::VERBOSE, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 
     template <typename... LogMessage>
-    void Logger::LogInfo(const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::LogInfo(const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(LogLevel::INFO, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(LogLevel::INFO, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 
     template <typename... LogMessage>
-    void Logger::LogWarning(const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::LogWarning(const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(LogLevel::WARNING, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(LogLevel::WARNING, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 
     template <typename... LogMessage>
-    void Logger::LogError(const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::LogError(const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(LogLevel::ERROR, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(LogLevel::ERROR, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 
     template <typename... LogMessage>
-    void Logger::LogCritical(const std::string_view a_format, LogMessage&&... a_message)
+    void Logger::LogCritical(const FormatLocation a_formatLoc, LogMessage&&... a_message)
     {
-        LogInternal(LogLevel::CRITICAL, std::source_location::current(), std::vformat(a_format, std::make_format_args(a_message...)));
+        LogInternal(LogLevel::CRITICAL, a_formatLoc.location,
+                    std::vformat(a_formatLoc.format, std::make_format_args(a_message...)));
     }
 }
