@@ -6,8 +6,8 @@ int main()
 {
     Debug::Logger& l_logger = Debug::Logger::GetInstance();
 
-    // Define the log file name, the size (in MiB) and the max file count
-    l_logger.Init("app", 1_MiB, 5, false);
+    // Define the log file name, the size (in MiB), the max file count and toggle color support
+    l_logger.Init("app", 1_MiB, 5, true);
 
     DEBUG_LOG(Debug::LogLevel::CRITICAL, "test");
     DEBUG_LOG_CRITICAL("test2");

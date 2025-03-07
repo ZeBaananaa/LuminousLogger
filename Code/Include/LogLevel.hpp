@@ -1,5 +1,4 @@
-#ifndef LOGLEVEL_HPP
-#define LOGLEVEL_HPP
+#pragma once
 
 namespace Debug
 {
@@ -12,5 +11,3 @@ namespace Debug
         CRITICAL = 4
     };
 }
-
-#endif //LOGLEVEL_HPP

@@ -39,7 +39,7 @@ namespace Debug
     inline std::string ToString(const char* a_char) { return a_char; }
 
     template<typename LogMessage>
-    void Logger::Log(const LogLevel& a_level, const LogMessage& a_message,
+    void Logger::Log(const LogLevel a_level, const LogMessage& a_message,
                      const std::source_location& a_location)
     {
         if (a_level < m_minLogLevel)

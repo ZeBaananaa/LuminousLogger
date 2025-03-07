@@ -4,8 +4,8 @@
 #include <mutex>
 #include <source_location>
 
-#include "LoggerExport.hpp"
 #include "LogLevel.hpp"
+#include "LoggerExport.hpp"
 #include "Utils.hpp"
 
 using Debug::Utils::operator""_MiB;
@@ -29,41 +29,45 @@ namespace Debug
         static Logger& GetInstance();
 
         /**
-         *
+         * @brief
          * @param a_filename Defines a custom name for log files. Do not specify the extension as all files are saved as .log
          * @param a_maxFileSize Defines the max size before rotating towards a new log file
          * @param a_maxFiles Defines the max amount of log files before deleting the oldest log file
+         * @param a_useColors Whether we should enable color support for the logger, or not
          */
-        void Init(const std::string& a_filename, const size_t& a_maxFileSize, const size_t& a_maxFiles, const bool& a_useColors);
+        void Init(const std::string& a_filename, size_t a_maxFileSize, size_t a_maxFiles, bool a_useColors);
 
-        template<typename LogMessage>
-        void LogVerbose(const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void LogVerbose(const LogMessage& a_message,
                         const std::source_location& a_location = std::source_location::current());
 
-        template<typename LogMessage>
-        void LogInfo(const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void LogInfo(const LogMessage& a_message,
                      const std::source_location& a_location = std::source_location::current());
 
-        template<typename LogMessage>
-        void LogWarning(const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void LogWarning(const LogMessage& a_message,
                         const std::source_location& a_location = std::source_location::current());
 
-        template<typename LogMessage>
-        void LogError(const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void LogError(const LogMessage& a_message,
                       const std::source_location& a_location = std::source_location::current());
 
-        template<typename LogMessage>
-        void LogCritical(const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void LogCritical(const LogMessage& a_message,
                          const std::source_location& a_location = std::source_location::current());
 
-        template<typename LogMessage>
-        void Log(const LogLevel& a_level = LogLevel::VERBOSE, const LogMessage& a_message = "Empty Message",
+        template <typename LogMessage>
+        void Log(LogLevel a_level, const LogMessage& a_message,
                  const std::source_location& a_location = std::source_location::current());
 
     private:
         explicit Logger() = default;
-
         ~Logger();
+
+        Logger(const Logger&); // Prevents singleton copy
+        Logger& operator=(const Logger&); // Prevents singleton assignment
+
 
         /**
          * @brief Helper function to trigger log file rotation
@@ -83,9 +87,8 @@ namespace Debug
          * @param a_location The location to show in the debug message
          * @return A formatted message with or without colors
          */
-        std::string FormatMessage(const LogLevel& a_level, const std::string& a_message,
-                                         const bool& a_useColors = false,
-                                         const std::source_location& a_location = std::source_location::current());
+        std::string FormatMessage(LogLevel a_level, const std::string& a_message, bool a_useColors,
+                                  const std::source_location& a_location) const;
 
         /**
          * @brief
@@ -93,7 +96,7 @@ namespace Debug
          * @param a_useColors Whether the message should be printed using color
          * @return A formatted string of the Log Level
          */
-        std::string LogLevelToString(const LogLevel& a_level, const bool& a_useColors = false);
+        std::string LogLevelToString(LogLevel a_level, bool a_useColors) const;
 
         /**
          *
