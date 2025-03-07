@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <thread>
 
@@ -29,7 +30,6 @@ namespace Debug
     Logger::Logger(const Logger& a_copy) :
         m_logQueue(a_copy.m_logQueue.GetCapacity()),
         m_logFilename(a_copy.m_logFilename),
-        m_minLogLevel(a_copy.m_minLogLevel),
         m_maxFileSize(a_copy.m_maxFileSize),
         m_maxFiles(a_copy.m_maxFiles),
         m_useColors(a_copy.m_useColors)
@@ -44,7 +44,6 @@ namespace Debug
             std::lock_guard<std::mutex> l_lock(m_logMutex);
 
             m_logFilename = a_other.m_logFilename;
-            m_minLogLevel = a_other.m_minLogLevel;
             m_maxFileSize = a_other.m_maxFileSize;
             m_maxFiles = a_other.m_maxFiles;
             m_useColors = a_other.m_useColors;
@@ -79,12 +78,8 @@ namespace Debug
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
 
-    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location,
-                             const std::string& a_message)
+    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location, const std::string& a_message)
     {
-        if (a_level < m_minLogLevel)
-            return;
-
         std::lock_guard l_lock(m_logMutex);
         const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
         const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
@@ -120,7 +115,7 @@ namespace Debug
         for (size_t i{m_maxFiles - 1}; i > 0; --i)
         {
             std::string l_oldFile = std::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_TEXT, LOG_FILE_FORMAT);
-            std::string l_newFile = std::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_TEXT, LOG_FILE_FORMAT);
+            std::string l_newFile = std::format("{}-{}{}{}", m_logFilename, ++i, OLD_FILE_TEXT, LOG_FILE_FORMAT);
 
             if (std::filesystem::exists(l_oldFile))
                 std::filesystem::rename(l_oldFile, l_newFile);
@@ -147,8 +142,7 @@ namespace Debug
         if (const size_t l_pos{l_filePath.find(PROJECT_FOLDER)}; l_pos != std::string_view::npos)
             l_filePath.remove_prefix(l_pos + PROJECT_FOLDER.size());
 
-        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(),
-                           a_location.function_name());
+        return std::format("{} ({}:{})", l_filePath, a_location.line(), a_location.column());
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,

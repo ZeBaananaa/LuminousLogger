@@ -13,11 +13,11 @@
 using Debug::Utils::operator""_MiB;
 
 #define DEBUG_LOG(level, ...) Debug::Logger::GetInstance().Log(level, ##__VA_ARGS__)
-/*#define DEBUG_LOG_VERBOSE(message) Debug::Logger::GetInstance().LogVerbose(message)
-#define DEBUG_LOG_INFO(message) Debug::Logger::GetInstance().LogInfo(message)
-#define DEBUG_LOG_WARNING(message) Debug::Logger::GetInstance().LogWarning(message)
-#define DEBUG_LOG_ERROR(message) Debug::Logger::GetInstance().LogError(message)
-#define DEBUG_LOG_CRITICAL(message) Debug::Logger::GetInstance().LogCritical(message)*/
+#define DEBUG_LOG_VERBOSE(...) Debug::Logger::GetInstance().LogVerbose(__VA_ARGS__)
+#define DEBUG_LOG_INFO(...) Debug::Logger::GetInstance().LogInfo(__VA_ARGS__)
+#define DEBUG_LOG_WARNING(...) Debug::Logger::GetInstance().LogWarning(__VA_ARGS__)
+#define DEBUG_LOG_ERROR(...) Debug::Logger::GetInstance().LogError(__VA_ARGS__)
+#define DEBUG_LOG_CRITICAL(...) Debug::Logger::GetInstance().LogCritical(__VA_ARGS__)
 
 namespace Debug
 {
@@ -39,25 +39,20 @@ namespace Debug
          */
         void Init(const std::string& a_filename, size_t a_maxFileSize, size_t a_maxFiles, bool a_useColors);
 
-        /*template <typename LogMessage>
-        void LogVerbose(const LogMessage& a_message,
-                        const std::source_location& a_location = std::source_location::current());
+        template <typename... LogMessage>
+        void LogVerbose(std::string_view a_format, LogMessage&&... a_message);
 
-        template <typename LogMessage>
-        void LogInfo(const LogMessage& a_message,
-                     const std::source_location& a_location = std::source_location::current());
+        template <typename... LogMessage>
+        void LogInfo(std::string_view a_format, LogMessage&&... a_message);
 
-        template <typename LogMessage>
-        void LogWarning(const LogMessage& a_message,
-                        const std::source_location& a_location = std::source_location::current());
+        template <typename... LogMessage>
+        void LogWarning(std::string_view a_format, LogMessage&&... a_message);
 
-        template <typename LogMessage>
-        void LogError(const LogMessage& a_message,
-                      const std::source_location& a_location = std::source_location::current());
+        template <typename... LogMessage>
+        void LogError(std::string_view a_format, LogMessage&&... a_message);
 
-        template <typename LogMessage>
-        void LogCritical(const LogMessage& a_message,
-                         const std::source_location& a_location = std::source_location::current());*/
+        template <typename... LogMessage>
+        void LogCritical(std::string_view a_format, LogMessage&&... a_message);
 
         template <typename... LogMessage>
         void Log(LogLevel a_level, std::string_view a_format, LogMessage&&... a_message);
@@ -117,7 +112,6 @@ namespace Debug
         std::ofstream m_logFile{};
         std::string m_logFilename{"app"};
         std::mutex m_logMutex{};
-        LogLevel m_minLogLevel{LogLevel::VERBOSE};
 
         size_t m_maxFileSize{1_MiB};
         size_t m_maxFiles{5};
