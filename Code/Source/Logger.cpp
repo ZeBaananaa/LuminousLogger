@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <sstream>
+#include <thread>
 
 constexpr std::string_view PROJECT_FOLDER{"LuminousLogger/"};
 constexpr std::string_view LATEST_LOG_FILE_NAME{"-latest"};
@@ -13,11 +14,8 @@ constexpr std::string_view OLD_FILE_TEXT{".old"};
 
 namespace Debug
 {
-    Logger& Logger::GetInstance()
-    {
-        static Logger s_instance{};
-        return s_instance;
-    }
+    // Creates a queue with a capacity of 10K messages.
+    Logger::Logger() : m_logQueue(10000){}
 
     Logger::~Logger()
     {
@@ -26,6 +24,7 @@ namespace Debug
     }
 
     Logger::Logger(const Logger& a_copy) :
+        m_logQueue(a_copy.m_logQueue.GetCapacity()),
         m_logFilename(a_copy.m_logFilename),
         m_minLogLevel(a_copy.m_minLogLevel),
         m_maxFileSize(a_copy.m_maxFileSize),
@@ -52,6 +51,12 @@ namespace Debug
         return *this;
     }
 
+    Logger& Logger::GetInstance()
+    {
+        static Logger s_instance{};
+        return s_instance;
+    }
+
     void Logger::Init(const std::string& a_filename, const size_t a_maxFileSize, const size_t a_maxFiles,
                       const bool a_useColors)
     {
@@ -67,6 +72,27 @@ namespace Debug
         if (!m_logFile.is_open())
             std::cerr << "File " + m_logFilename << LATEST_LOG_FILE_NAME << LOG_FILE_FORMAT <<
                 " could not be opened!\n";
+
+        m_loggingThread = std::thread(&Logger::PrintLogs, this);
+    }
+
+    void Logger::PrintLogs()
+    {
+        while (!m_stopLogger)
+        {
+            if (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
+                m_logFile << *l_log << std::endl;
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+
+    void Logger::StopThread()
+    {
+        m_stopLogger = true;
+
+        if (m_loggingThread.joinable())
+            m_loggingThread.join();
     }
 
     void Logger::RotateLogs()
@@ -102,7 +128,8 @@ namespace Debug
         if (const size_t l_pos{l_filePath.find(PROJECT_FOLDER)}; l_pos != std::string_view::npos)
             l_filePath.remove_prefix(l_pos + PROJECT_FOLDER.size());
 
-        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(), a_location.function_name());
+        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(),
+                           a_location.function_name());
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,

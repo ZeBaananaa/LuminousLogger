@@ -3,7 +3,9 @@
 #include <fstream>
 #include <mutex>
 #include <source_location>
+#include <thread>
 
+#include "LockFreeQueue.hpp"
 #include "LogLevel.hpp"
 #include "LoggerExport.hpp"
 #include "Utils.hpp"
@@ -62,12 +64,14 @@ namespace Debug
                  const std::source_location& a_location = std::source_location::current());
 
     private:
-        explicit Logger() = default;
+        explicit Logger();
         ~Logger();
 
         Logger(const Logger&); // Prevents singleton copy
         Logger& operator=(const Logger&); // Prevents singleton assignment
 
+        void PrintLogs();
+        void StopThread();
 
         /**
          * @brief Helper function to trigger log file rotation
@@ -105,6 +109,10 @@ namespace Debug
          */
         static std::string GetSourceLocation(const std::source_location& a_location);
 
+        std::thread m_loggingThread{};
+        LockFreeQueue m_logQueue{0};
+
+        bool m_stopLogger = false;
         std::ofstream m_logFile{};
         std::string m_logFilename{"app"};
         std::mutex m_logMutex{};
