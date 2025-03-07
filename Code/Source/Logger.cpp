@@ -15,7 +15,10 @@ constexpr std::string_view OLD_FILE_TEXT{".old"};
 namespace Debug
 {
     // Creates a queue with a capacity of 10K messages.
-    Logger::Logger() : m_logQueue(10000){}
+    Logger::Logger() :
+        m_logQueue(10000)
+    {
+    }
 
     Logger::~Logger()
     {
@@ -74,6 +77,22 @@ namespace Debug
                 " could not be opened!\n";
 
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
+    }
+
+    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location,
+                             const std::string& a_message)
+    {
+        if (a_level < m_minLogLevel)
+            return;
+
+        std::lock_guard l_lock(m_logMutex);
+        const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
+        const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
+
+        std::cout << l_formattedConsoleMsg << "\n";
+
+        if (m_logFile.is_open())
+            m_logFile << l_formattedLogFileMsg << "\n";
     }
 
     void Logger::PrintLogs()

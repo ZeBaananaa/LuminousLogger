@@ -12,12 +12,12 @@
 
 using Debug::Utils::operator""_MiB;
 
-#define DEBUG_LOG(level, message) Debug::Logger::GetInstance().Log(level, message)
-#define DEBUG_LOG_VERBOSE(message) Debug::Logger::GetInstance().LogVerbose(message)
+#define DEBUG_LOG(level, ...) Debug::Logger::GetInstance().Log(level, ##__VA_ARGS__)
+/*#define DEBUG_LOG_VERBOSE(message) Debug::Logger::GetInstance().LogVerbose(message)
 #define DEBUG_LOG_INFO(message) Debug::Logger::GetInstance().LogInfo(message)
 #define DEBUG_LOG_WARNING(message) Debug::Logger::GetInstance().LogWarning(message)
 #define DEBUG_LOG_ERROR(message) Debug::Logger::GetInstance().LogError(message)
-#define DEBUG_LOG_CRITICAL(message) Debug::Logger::GetInstance().LogCritical(message)
+#define DEBUG_LOG_CRITICAL(message) Debug::Logger::GetInstance().LogCritical(message)*/
 
 namespace Debug
 {
@@ -39,7 +39,7 @@ namespace Debug
          */
         void Init(const std::string& a_filename, size_t a_maxFileSize, size_t a_maxFiles, bool a_useColors);
 
-        template <typename LogMessage>
+        /*template <typename LogMessage>
         void LogVerbose(const LogMessage& a_message,
                         const std::source_location& a_location = std::source_location::current());
 
@@ -57,11 +57,12 @@ namespace Debug
 
         template <typename LogMessage>
         void LogCritical(const LogMessage& a_message,
-                         const std::source_location& a_location = std::source_location::current());
+                         const std::source_location& a_location = std::source_location::current());*/
 
-        template <typename LogMessage>
-        void Log(LogLevel a_level, const LogMessage& a_message,
-                 const std::source_location& a_location = std::source_location::current());
+        template <typename... LogMessage>
+        void Log(LogLevel a_level, std::string_view a_format, LogMessage&&... a_message);
+
+        void LogInternal(LogLevel a_level, const std::source_location& a_location, const std::string& a_message);
 
     private:
         explicit Logger();

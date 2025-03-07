@@ -11,25 +11,27 @@ int main()
     // Define the log file name, the size (in MiB), the max file count and toggle color support
     l_logger.Init("app", 1_MiB, 5, true);
 
-    DEBUG_LOG(Debug::LogLevel::CRITICAL, "test");
-    DEBUG_LOG_CRITICAL("test2");
+    bool b0 = true;
 
-    l_logger.LogVerbose("Test Verbose Message!");
-    l_logger.LogInfo("Application is running");
-    l_logger.LogWarning("Test Warning Message");
-    l_logger.LogError("Test Error Message");
-    l_logger.LogCritical("Test Critical Message");
-    l_logger.Log(Debug::LogLevel::VERBOSE, 1);
-    l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
+    DEBUG_LOG(Debug::LogLevel::CRITICAL, "Test, {} {} {}", b0, 50.f, 0.248558654);
+    //DEBUG_LOG_CRITICAL("test2");
 
-    double test{1.2564484861878545};
+    //l_logger.LogVerbose("Test Verbose Message!");
+    //l_logger.LogInfo("Application is running");
+    //l_logger.LogWarning("Test Warning Message");
+    //l_logger.LogError("Test Error Message");
+    //l_logger.LogCritical("Test Critical Message");
+    //l_logger.Log(Debug::LogLevel::VERBOSE, 1);
+    //l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
+
+    /*double test{1.2564484861878545};
     l_logger.Log(Debug::LogLevel::VERBOSE, test);
 
     float t{0.155654986465465f};
     l_logger.Log(Debug::LogLevel::VERBOSE, t);
 
     bool b{false};
-    l_logger.Log(Debug::LogLevel::VERBOSE, b);
+    l_logger.Log(Debug::LogLevel::VERBOSE, b);*/
 
 
     //DEBUG_LOG_INFO("test", b, t, test);
@@ -62,7 +64,7 @@ void LoopTests()
         std::string result = std::string("Message ") + std::to_string(message_count) + " - Temps depuis dernier print: "
             + std::to_string(elapsed_ms) + "ms";
         ++message_count;
-        DEBUG_LOG_INFO(result);
+        //DEBUG_LOG(result);
 
         std::cout << "Message " << ++message_count
             << " - Temps depuis dernier print: " << elapsed_ms << "ms" << std::endl;
@@ -78,6 +80,6 @@ void LoopTests()
     /*std::cout << "\nLoop ended after 15s\n";
     std::cout << "Total messages printed: " << message_count;*/
 
-    DEBUG_LOG_INFO("\n\n\nLoop ended after 15s\n");
-    DEBUG_LOG_INFO("Total messages printed: " + 5 + 10 + 50);
+    //DEBUG_LOG("\n\n\nLoop ended after 15s\n");
+    //DEBUG_LOG("Total messages printed: " + 5 + 10 + 50);
 }
