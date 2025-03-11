@@ -12,27 +12,29 @@ constexpr std::string_view PROJECT_FOLDER{"LuminousLogger/"};
 constexpr std::string_view LATEST_LOG_FILE_NAME{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
 constexpr std::string_view OLD_FILE_TEXT{".old"};
+constexpr size_t FLUSH_THRESHOLD{10};
+constexpr std::chrono::seconds FLUSH_INTERVAL{std::chrono::seconds(1)};
 
 namespace Debug
 {
     // Creates a queue with a capacity of 10K messages.
-    Logger::Logger() :
-        m_logQueue(10000)
+    Logger::Logger() : m_logQueue(10000)
     {
     }
 
     Logger::~Logger()
     {
+        StopThread();
+
         if (m_logFile.is_open())
             m_logFile.close();
     }
 
-    Logger::Logger(const Logger& a_copy) :
-        m_logQueue(a_copy.m_logQueue.GetCapacity()),
-        m_logFilename(a_copy.m_logFilename),
-        m_maxFileSize(a_copy.m_maxFileSize),
-        m_maxFiles(a_copy.m_maxFiles),
-        m_useColors(a_copy.m_useColors)
+    Logger::Logger(const Logger& a_copy) : m_logQueue(a_copy.m_logQueue.GetCapacity()),
+                                           m_logFilename(a_copy.m_logFilename),
+                                           m_maxFileSize(a_copy.m_maxFileSize),
+                                           m_maxFiles(a_copy.m_maxFiles),
+                                           m_useColors(a_copy.m_useColors)
     {
         std::cout << "Logger was copied then deleted!\n";
     }
@@ -69,11 +71,11 @@ namespace Debug
         m_useColors = a_useColors;
 
         m_logFile.open(a_filename + std::string(LATEST_LOG_FILE_NAME) + std::string(LOG_FILE_FORMAT),
-                       std::ios::out | std::ios::app);
+                       std::ios::out | std::ios::app | std::ios::ate);
 
         if (!m_logFile.is_open())
             std::cerr << "File " + m_logFilename << LATEST_LOG_FILE_NAME << LOG_FILE_FORMAT <<
-                " could not be opened!\n";
+                    " could not be opened!\n";
 
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
@@ -85,21 +87,42 @@ namespace Debug
         const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
         const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
 
+        m_logQueue.PushLogToQueue(l_formattedLogFileMsg);
         std::cout << l_formattedConsoleMsg << "\n";
-
-        if (m_logFile.is_open())
-            m_logFile << l_formattedLogFileMsg << "\n";
     }
 
     void Logger::PrintLogs()
     {
+        size_t l_logCount = 0;
+        std::chrono::time_point<std::chrono::steady_clock> l_lastFlushTime = std::chrono::steady_clock::now();
+        std::chrono::time_point<std::chrono::steady_clock> l_now = std::chrono::steady_clock::now();
+
         while (!m_stopLogger)
         {
             if (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
-                m_logFile << *l_log << std::endl;
+            {
+                if (m_logFile.is_open())
+                {
+                    m_logFile << *l_log << "\n";
+                    ++l_logCount;
+                }
+            }
             else
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+            l_now = std::chrono::steady_clock::now();
+            if (l_logCount >= FLUSH_THRESHOLD || l_now - l_lastFlushTime >= FLUSH_INTERVAL)
+            {
+                CheckLogFileSize();
+
+                m_logFile.flush();
+                l_logCount = 0;
+                l_lastFlushTime = l_now;
+            }
         }
+
+        if (l_logCount > 0)
+            m_logFile.flush();
     }
 
     void Logger::StopThread()
@@ -113,10 +136,10 @@ namespace Debug
     void Logger::RotateLogs()
     {
         m_logFile.close();
-        for (size_t i{m_maxFiles - 1}; i > 0; --i)
+        for (size_t i = m_maxFiles - 1; i > 0; --i)
         {
             std::string l_oldFile = std::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_TEXT, LOG_FILE_FORMAT);
-            std::string l_newFile = std::format("{}-{}{}{}", m_logFilename, ++i, OLD_FILE_TEXT, LOG_FILE_FORMAT);
+            std::string l_newFile = std::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_TEXT, LOG_FILE_FORMAT);
 
             if (std::filesystem::exists(l_oldFile))
                 std::filesystem::rename(l_oldFile, l_newFile);
@@ -143,7 +166,8 @@ namespace Debug
         if (const size_t l_pos{l_filePath.find(PROJECT_FOLDER)}; l_pos != std::string_view::npos)
             l_filePath.remove_prefix(l_pos + PROJECT_FOLDER.size());
 
-        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(), a_location.function_name());
+        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(),
+                           a_location.function_name());
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,

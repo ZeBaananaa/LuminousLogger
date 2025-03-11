@@ -78,5 +78,8 @@ set_target_properties(L_LOGGER PROPERTIES PREFIX "")
 set_target_properties(L_LOGGER PROPERTIES OUTPUT_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
 
 
+option(BUILD_EXECUTABLE "Build an executable to live debug the logger" ON)
 
-add_subdirectory(Test)
+if (BUILD_EXECUTABLE)
+    add_subdirectory(Test)
+endif ()
