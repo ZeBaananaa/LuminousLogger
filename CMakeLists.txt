@@ -50,9 +50,9 @@ target_include_directories(L_LOGGER PUBLIC "Code/Include")
 target_compile_features(L_LOGGER PUBLIC cxx_std_20)
 
 if (MSVC)
-    target_compile_options(L_LOGGER PUBLIC /W4 /WX)
+    target_compile_options(L_LOGGER PUBLIC /W3 /WX)
 else ()
-    target_compile_options(L_LOGGER PUBLIC -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(L_LOGGER PUBLIC -Wall -Wextra -Wpedantic)
 endif ()
 
 # To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
