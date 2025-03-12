@@ -47,7 +47,10 @@ void LoopTests()
 
 int main()
 {
-    LoopTests();
+    float f = 0.5f;
+    DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
+   //
+   // LoopTests();
     getchar();
     return 0;
 }

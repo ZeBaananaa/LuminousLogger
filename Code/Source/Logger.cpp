@@ -106,8 +106,7 @@ namespace Debug
                     m_logFile << *l_log << "\n";
                     ++l_logCount;
                 }
-            }
-            else
+            } else
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
             l_now = std::chrono::steady_clock::now();
