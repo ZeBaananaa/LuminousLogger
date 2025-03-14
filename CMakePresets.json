@@ -24,10 +24,8 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/TEMP/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
         "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "L_MATHS_UNITTEST": true
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -37,10 +35,8 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/TEMP/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
         "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
-        "CMAKE_BUILD_TYPE": "Release",
-        "L_MATHS_UNITTEST": true
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
@@ -50,10 +46,8 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/TEMP/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "C:/msys64/clang64/bin/clang.exe",
         "CMAKE_CXX_COMPILER": "C:/msys64/clang64/bin/clang++.exe",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "L_MATHS_UNITTEST": true
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -63,10 +57,8 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/TEMP/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "C:/msys64/clang64/bin/clang.exe",
         "CMAKE_CXX_COMPILER": "C:/msys64/clang64/bin/clang++.exe",
-        "CMAKE_BUILD_TYPE": "Release",
-        "L_MATHS_UNITTEST": true
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],

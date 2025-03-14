@@ -2,6 +2,7 @@
 
 #include "LogColor.hpp"
 
+#include <ctime>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
@@ -176,7 +177,12 @@ namespace Debug
         const time_t l_time{std::chrono::system_clock::to_time_t(l_now)};
 
         std::ostringstream l_timeStr{};
-        l_timeStr << std::put_time(std::localtime(&l_time), "%Y-%m-%d %H:%M:%S");
+        tm l_ltm{};
+
+        if (localtime_s(&l_ltm, &l_time) == 0)
+            l_timeStr << std::put_time(&l_ltm, "%Y-%m-%d %H:%M:%S");
+        else
+            l_timeStr << "Invalid Time";
 
         if (m_useColors && a_useColors)
             return std::format("{} [ {} ] - [ {} ] : {}{}{}", LogLevelToString(a_level, true), l_timeStr.str(),
