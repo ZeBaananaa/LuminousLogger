@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
-        VERSION 1.0.0
+        VERSION 1.0.1
         LANGUAGES CXX)
 
 # Define output build folder
@@ -47,7 +47,7 @@ target_include_directories(L_LOGGER PUBLIC "Code/Include")
 #---------------------------------------#
 #                COMPILE MODE           #
 #---------------------------------------#
-target_compile_features(L_LOGGER PUBLIC cxx_std_20)
+target_compile_features(L_LOGGER PUBLIC cxx_std_23)
 
 if (MSVC)
     target_compile_options(L_LOGGER PUBLIC /W3 /WX)
