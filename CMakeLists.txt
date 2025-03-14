@@ -35,7 +35,7 @@ file(GLOB_RECURSE L_LOGGER_SOURCES "Code/*.cpp")
 #---------------------------------------#
 #            BUILD MODE                 #
 #---------------------------------------#
-add_library(L_LOGGER SHARED ${L_LOGGER_SOURCES})
+add_library(L_LOGGER STATIC ${L_LOGGER_SOURCES})
 
 
 #---------------------------------------#
@@ -67,9 +67,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 
 #---------------------------------------#
-#        EXPORTS / IMPORTS FOR DLL      #
+#        EXPORTS / IMPORTS FOR LIB      #
 #---------------------------------------#
-target_compile_definitions(L_LOGGER PRIVATE LUMINOUS_LOGGER_EXPORTS)
 
 # Disable lib prefix
 set_target_properties(L_LOGGER PROPERTIES PREFIX "")

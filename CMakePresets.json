@@ -1,0 +1,120 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "VS_2022",
+      "displayName": "Visual Studio 2022",
+      "description": "MSVC Compiler",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "binaryDir": "${sourceDir}/TEMP/${presetName}",
+      "cacheVariables": {
+        "L_MATHS_UNITTEST": true
+      }
+    },
+    {
+      "name": "MinGW_Ninja_Debug",
+      "displayName": "MinGW + Ninja Debug",
+      "description": "MinGW Compiler with Ninja (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/TEMP/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "L_MATHS_UNITTEST": true
+      }
+    },
+    {
+      "name": "MinGW_Ninja_Release",
+      "displayName": "MinGW + Ninja Release",
+      "description": "MinGW Compiler with Ninja (Release)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/TEMP/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+        "CMAKE_BUILD_TYPE": "Release",
+        "L_MATHS_UNITTEST": true
+      }
+    },
+    {
+      "name": "Clang_Ninja_Debug",
+      "displayName": "Clang + Ninja Debug",
+      "description": "Clang Compiler with Ninja (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/TEMP/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/clang64/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/clang64/bin/clang++.exe",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "L_MATHS_UNITTEST": true
+      }
+    },
+    {
+      "name": "Clang_Ninja_Release",
+      "displayName": "Clang + Ninja Release",
+      "description": "Clang Compiler with Ninja (Release)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/TEMP/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/clang64/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/clang64/bin/clang++.exe",
+        "CMAKE_BUILD_TYPE": "Release",
+        "L_MATHS_UNITTEST": true
+      }
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "VS_2022 Debug",
+      "description": "Visual Studio multi-config Debug preset",
+      "configurePreset": "VS_2022",
+      "configuration": "Debug",
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "VS_2022 Release",
+      "description": "Visual Studio multi-config Release preset",
+      "configurePreset": "VS_2022",
+      "configuration": "Release",
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "MinGW_Ninja_Debug",
+      "description": "MinGW + Ninja Debug build preset",
+      "configurePreset": "MinGW_Ninja_Debug",
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "MinGW_Ninja_Release",
+      "description": "MinGW + Ninja Release build preset",
+      "configurePreset": "MinGW_Ninja_Release",
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "Clang_Ninja_Debug",
+      "description": "Clang + Ninja Debug build preset",
+      "configurePreset": "Clang_Ninja_Debug",
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "Clang_Ninja_Release",
+      "description": "Clang + Ninja Release build preset",
+      "configurePreset": "Clang_Ninja_Release",
+      "verbose": true,
+      "jobs": 8
+    }
+  ]
+}

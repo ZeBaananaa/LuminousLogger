@@ -7,7 +7,6 @@
 
 #include "LockFreeQueue.hpp"
 #include "LogLevel.hpp"
-#include "LoggerExport.hpp"
 #include "Utils.hpp"
 
 using Debug::Utils::operator""_MiB;
@@ -21,7 +20,7 @@ using Debug::Utils::operator""_MiB;
 
 namespace Debug
 {
-    class LUMINOUS_LOGGER_API Logger
+    class Logger
     {
     public:
         /**
