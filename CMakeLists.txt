@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
-        VERSION 1.0.2
+        VERSION 1.0.3
         LANGUAGES CXX)
 
 # Define output build folder
@@ -77,7 +77,7 @@ set_target_properties(L_LOGGER PROPERTIES PREFIX "")
 set_target_properties(L_LOGGER PROPERTIES OUTPUT_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
 
 
-option(BUILD_EXECUTABLE "Build an executable to live debug the logger" ON)
+option(BUILD_EXECUTABLE "Build an executable to live debug the logger" OFF)
 
 if (BUILD_EXECUTABLE)
     add_subdirectory(Test)
