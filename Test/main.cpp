@@ -12,7 +12,7 @@ void LoopTests()
     // Define the log file name, the size (in MiB), the max file count and toggle color support
     l_logger.Init("app", 1_MiB, 5, true);
 
-    std::chrono::time_point<std::chrono::steady_clock> l_startTime = std::chrono::steady_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> l_startTime = std::chrono::steady_clock::now();
     // Record start time
     const std::chrono::seconds l_duration = std::chrono::seconds(15); // Set logging duration to x seconds
     int l_messageCount = 0; // Amount of messages logged
@@ -47,6 +47,11 @@ void LoopTests()
 
 int main()
 {
+    Debug::Logger& l_logger = Debug::Logger::GetInstance();
+
+    // Define the log file name, the size (in MiB), the max file count and toggle color support
+    l_logger.Init("app", 1_MiB, 5, true);
+
     float f = 0.5f;
     DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
    //
