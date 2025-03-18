@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <mutex>
 #include <source_location>
@@ -108,11 +109,18 @@ namespace Debug
         std::string LogLevelToString(LogLevel a_level, bool a_useColors) const;
 
         /**
-         *
+         * @brief
          * @param a_location The location to show in the debug message
          * @return Either the specified location, or, in not specified, the location of the log message
          */
         static std::string GetSourceLocation(const std::source_location& a_location);
+
+        /**
+         * @brief Helper function to get a proper relative path
+         * @param a_startPath The path from which we should start the recursive search (usually the current path)
+         * @return The project path
+         */
+        static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
         std::thread m_loggingThread{};
         LockFreeQueue m_logQueue{0};

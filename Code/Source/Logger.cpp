@@ -9,7 +9,6 @@
 #include <sstream>
 #include <thread>
 
-constexpr std::string_view PROJECT_FOLDER{"LuminousLogger/"};
 constexpr std::string_view LATEST_LOG_FILE_NAME{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
 constexpr std::string_view OLD_FILE_TEXT{".old"};
@@ -161,13 +160,30 @@ namespace Debug
 
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
     {
-        std::string_view l_filePath{a_location.file_name()};
+        const std::string_view l_filePath{a_location.file_name()};
 
-        if (const size_t l_pos{l_filePath.find(PROJECT_FOLDER)}; l_pos != std::string_view::npos)
-            l_filePath.remove_prefix(l_pos + PROJECT_FOLDER.size());
+        const std::filesystem::path l_fullPath = std::filesystem::path(l_filePath);
+        const std::filesystem::path l_baseDir = FindProjectRoot(l_fullPath);
 
-        return std::format("{} ({}:{}) - {}", l_filePath, a_location.line(), a_location.column(),
+        const std::filesystem::path l_relativePath = std::filesystem::relative(l_fullPath, l_baseDir);
+
+        return std::format("{} ({}:{}) - {}", l_relativePath.string(), a_location.line(), a_location.column(),
                            a_location.function_name());
+    }
+
+    std::filesystem::path Logger::FindProjectRoot(const std::filesystem::path& a_startPath)
+    {
+        std::filesystem::path l_currentPath = a_startPath;
+
+        while (l_currentPath != l_currentPath.root_path())
+        {
+            if (std::filesystem::exists(l_currentPath / "CMakeLists.txt"))
+                return l_currentPath;
+
+            l_currentPath = l_currentPath.parent_path();
+        }
+
+        return std::filesystem::path{"/"};
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,
