@@ -12,13 +12,11 @@
 constexpr std::string_view LATEST_LOG_FILE_NAME{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
 constexpr std::string_view OLD_FILE_TEXT{".old"};
-constexpr size_t FLUSH_THRESHOLD{10};
-constexpr std::chrono::seconds FLUSH_INTERVAL{std::chrono::seconds(1)};
 
 namespace Debug
 {
-    // Creates a queue with a capacity of 10K messages.
-    Logger::Logger() : m_logQueue(10000)
+    // Creates a queue with a capacity of 100 messages.
+    Logger::Logger() : m_logQueue(64)
     {
     }
 
@@ -94,8 +92,6 @@ namespace Debug
     void Logger::PrintLogs()
     {
         size_t l_logCount = 0;
-        std::chrono::time_point<std::chrono::steady_clock> l_lastFlushTime = std::chrono::steady_clock::now();
-        std::chrono::time_point<std::chrono::steady_clock> l_now = std::chrono::steady_clock::now();
 
         while (!m_stopLogger)
         {
@@ -108,20 +104,8 @@ namespace Debug
                 }
             } else
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-            l_now = std::chrono::steady_clock::now();
-            if (l_logCount >= FLUSH_THRESHOLD || l_now - l_lastFlushTime >= FLUSH_INTERVAL)
-            {
-                CheckLogFileSize();
-
-                m_logFile.flush();
-                l_logCount = 0;
-                l_lastFlushTime = l_now;
-            }
         }
-
-        if (l_logCount > 0)
-            m_logFile.flush();
+        CheckLogFileSize();
     }
 
     void Logger::StopThread()

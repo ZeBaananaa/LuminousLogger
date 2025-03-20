@@ -123,7 +123,7 @@ namespace Debug
         static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
         std::thread m_loggingThread{};
-        LockFreeQueue m_logQueue{0};
+        LockFreeQueue m_logQueue{64};
 
         bool m_stopLogger = false;
         std::ofstream m_logFile{};

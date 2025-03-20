@@ -47,15 +47,15 @@ void LoopTests()
 
 int main()
 {
-    Debug::Logger& l_logger = Debug::Logger::GetInstance();
+    /*Debug::Logger& l_logger = Debug::Logger::GetInstance();
 
     // Define the log file name, the size (in MiB), the max file count and toggle color support
-    l_logger.Init("app", 1_MiB, 5, true);
+    l_logger.Init("app", 1_MiB, 5, true);*/
 
     float f = 0.5f;
     DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
    //
-   // LoopTests();
+    LoopTests();
     getchar();
     return 0;
 }
