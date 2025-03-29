@@ -4,27 +4,36 @@ namespace Debug
 {
     bool LockFreeQueue::PushLogToQueue(const std::string& a_log)
     {
-        const size_t l_currentTail = m_tail.load(std::memory_order_relaxed);
-        const size_t l_nextTail = (l_currentTail + 1) % m_capacity;
+        size_t l_currentTail{};
+        size_t l_nextTail{};
+        do
+        {
+            l_currentTail = m_tail.load(std::memory_order_relaxed);
+            l_nextTail = (l_currentTail + 1) & (m_capacity - 1);
 
-        if (l_nextTail == m_head.load(std::memory_order_acquire))
-            return false;
+            if (l_nextTail == m_head.load(std::memory_order_acquire))
+                return false;
+        }
+        while (!m_tail.compare_exchange_weak(l_currentTail, l_nextTail, std::memory_order_release,
+                                             std::memory_order_relaxed));
 
         m_data[l_currentTail] = a_log;
-        m_tail.store(l_nextTail, std::memory_order_release);
         return true;
     }
 
     std::optional<std::string> LockFreeQueue::PopLogFromQueue()
     {
-        const size_t l_currentHead = m_head.load(std::memory_order_relaxed);
+        size_t l_currentHead{};
+        do
+        {
+            l_currentHead = m_head.load(std::memory_order_relaxed);
 
-        if (l_currentHead == m_tail.load(std::memory_order_acquire))
-            return std::nullopt; // nullopt == nullptr for optional object
+            if (l_currentHead == m_tail.load(std::memory_order_acquire))
+                return std::nullopt;
+        }
+        // Bitwise operation used for better optimization than the '%' sign (only when queue capacity is a power of 2)
+        while (!m_head.compare_exchange_weak(l_currentHead, (l_currentHead + 1) & (m_capacity - 1), std::memory_order_release, std::memory_order_relaxed));
 
-        std::string l_log = m_data[l_currentHead];
-        m_head.store((l_currentHead + 1) % m_capacity, std::memory_order_release);
-        return l_log;
-
+        return m_data[l_currentHead];;
     }
 }

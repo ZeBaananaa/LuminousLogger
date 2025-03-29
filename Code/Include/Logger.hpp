@@ -9,6 +9,7 @@
 #include "LockFreeQueue.hpp"
 #include "LogLevel.hpp"
 #include "Utils.hpp"
+#include "fmt/color.h"
 #include "fmt/os.h"
 
 using Debug::Utils::operator""_MiB;
@@ -40,15 +41,18 @@ namespace Debug
          */
         void Init(const std::string& a_filename, size_t a_maxFileSize, size_t a_maxFiles, bool a_useColors);
 
+
         struct FormatLocation
         {
-            std::string_view format{};
-            std::source_location location{};
+            std::string_view format{ };
+            std::source_location location{ };
 
             template <typename LogMessage>
-            FormatLocation(LogMessage&& a_logMessage, const std::source_location a_location = std::source_location::current()) :
-                format{std::forward<LogMessage>(a_logMessage)}, location{a_location}{}
+            FormatLocation(LogMessage&& a_logMessage,
+                           const std::source_location a_location = std::source_location::current()) :
+                format{std::forward<LogMessage>(a_logMessage)}, location{a_location} {}
         };
+
 
         template <typename... LogMessage>
         void LogVerbose(FormatLocation a_formatLoc, LogMessage&&... a_message);
@@ -104,10 +108,16 @@ namespace Debug
         /**
          * @brief
          * @param a_level The log level
-         * @param a_useColors Whether the message should be printed using color
          * @return A formatted string of the Log Level
          */
-        std::string LogLevelToString(LogLevel a_level, bool a_useColors) const;
+        static std::string LogLevelToString(LogLevel a_level);
+
+        /**
+         * @brief
+         * @param a_level The log level to use
+         * @return a color based on the log level
+         */
+        static fmt::text_style GetLogColor(LogLevel a_level);
 
         /**
          * @brief
@@ -123,13 +133,13 @@ namespace Debug
          */
         static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
-        std::thread m_loggingThread{};
+        std::thread m_loggingThread{ };
         LockFreeQueue m_logQueue{64};
 
         bool m_stopLogger = false;
-        std::ofstream m_logFile{};
+        std::ofstream m_logFile{ };
         std::string m_logFilename{"app"};
-        std::mutex m_logMutex{};
+        std::mutex m_logMutex{ };
 
         size_t m_maxFileSize{1_MiB};
         size_t m_maxFiles{5};

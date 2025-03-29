@@ -1,14 +1,11 @@
 #include "Logger.hpp"
 
-#include "LogColor.hpp"
-
-#include <ctime>
 #include <filesystem>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <thread>
 
+#include "fmt/chrono.h"
+#include "fmt/color.h"
 #include "fmt/format.h"
 
 constexpr std::string_view LATEST_LOG_FILE_SUFFIX{"-latest"};
@@ -125,21 +122,20 @@ namespace Debug
 
     void Logger::CheckLogFileSize()
     {
-        const std::string l_latestFile = std::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
+        const std::string l_latestFile = fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
         if (std::filesystem::exists(l_latestFile) && std::filesystem::file_size(l_latestFile) >= m_maxFileSize)
             RotateLogs();
     }
 
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
     {
-        const std::string_view l_filePath{a_location.file_name()};
-
-        const std::filesystem::path l_fullPath = std::filesystem::path(l_filePath);
+        const std::filesystem::path l_fullPath = std::filesystem::path(a_location.file_name());
         const std::filesystem::path l_baseDir = FindProjectRoot(l_fullPath);
 
         const std::filesystem::path l_relativePath = std::filesystem::relative(l_fullPath, l_baseDir);
 
-        return fmt::format("{} ({}:{}) - {}", l_relativePath.string(), a_location.line(), a_location.column(), a_location.function_name());
+        return fmt::format("{} ({}:{}) - {}", l_relativePath.string(), a_location.line(), a_location.column(),
+                           a_location.function_name());
     }
 
     std::filesystem::path Logger::FindProjectRoot(const std::filesystem::path& a_startPath)
@@ -154,38 +150,62 @@ namespace Debug
             l_currentPath = l_currentPath.parent_path();
         }
 
-        return std::filesystem::path{"/"};
+        return "/";
     }
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,
                                       const std::source_location& a_location) const
     {
         const std::chrono::time_point l_now{std::chrono::system_clock::now()};
-        std::string l_timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", l_now);
+        const std::string l_timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", l_now);
 
         if (m_useColors && a_useColors)
-            return fmt::format("{} [{}] - [{}] : {}{}{}", LogLevelToString(a_level, true), l_timestamp,
-                               GetSourceLocation(a_location), s_LogLevelColor.at(a_level), a_message,
-                               ColorMap.at(ColorEnum::RESET));
+        {
+            const fmt::text_style l_logStyle = GetLogColor(a_level);
+            return fmt::format("{} [{}] - [{}] : {}",
+                               fmt::styled(LogLevelToString(a_level), l_logStyle),
+                               l_timestamp, GetSourceLocation(a_location), fmt::styled(a_message, l_logStyle));
+        }
 
-        return fmt::format("{} [{}] - [{}] : {}", LogLevelToString(a_level, false), l_timestamp,
+        return fmt::format("{} [{}] - [{}] : {}", LogLevelToString(a_level), l_timestamp,
                            GetSourceLocation(a_location), a_message);
     }
 
-    std::string Logger::LogLevelToString(const LogLevel a_level, const bool a_useColors) const
+    std::string Logger::LogLevelToString(const LogLevel a_level)
     {
-        const std::unordered_map<LogLevel, std::string> l_logLevelStrings
+        switch (a_level)
         {
-            {LogLevel::VERBOSE, "VERBOSE    "},
-            {LogLevel::INFO, "INFO       "},
-            {LogLevel::WARNING, "WARNING    "},
-            {LogLevel::ERROR, "ERROR      "},
-            {LogLevel::CRITICAL, "CRITICAL   "}
-        };
+        case LogLevel::VERBOSE :
+            return "VERBOSE    ";
+        case LogLevel::INFO :
+            return "INFO       ";
+        case LogLevel::WARNING :
+            return "WARNING    ";
+        case LogLevel::ERROR       :
+            return "ERROR";
+        case LogLevel::CRITICAL :
+            return "CRITICAL   ";
+        default :
+            return "VERBOSE    ";
+        }
+    }
 
-        std::string l_levelStr = l_logLevelStrings.at(a_level);
-        return (m_useColors && a_useColors)
-            ? fmt::format("{}{}{}", s_LogLevelColor.at(a_level), l_levelStr, ColorMap.at(ColorEnum::RESET))
-            : l_levelStr;
+    fmt::text_style Logger::GetLogColor(const LogLevel a_level)
+    {
+        switch (a_level)
+        {
+        case LogLevel::VERBOSE :
+            return fmt::fg(fmt::color::gray) | fmt::emphasis::bold;
+        case LogLevel::INFO :
+            return fmt::fg(fmt::color::green) | fmt::emphasis::bold;
+        case LogLevel::WARNING :
+            return fmt::fg(fmt::color::yellow) | fmt::emphasis::bold;
+        case LogLevel::ERROR :
+            return fmt::fg(fmt::color::red) | fmt::emphasis::bold;
+        case LogLevel::CRITICAL :
+            return fmt::fg(fmt::color::purple) | fmt::emphasis::bold;
+        default :
+            return fmt::fg(fmt::color::white);
+        }
     }
 }

@@ -27,13 +27,13 @@ void LoopTests()
         const long long l_elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(l_elapsedTime).count();
 
         std::string l_result = std::string("Message ") + std::to_string(l_messageCount) + " - Time since last print: "
-                               + std::to_string(l_elapsedMs) + "ms";
+            + std::to_string(l_elapsedMs) + "ms";
         DEBUG_LOG_INFO("{}", l_result);
 
         ++l_messageCount;
 
         std::cout << "Message " << l_messageCount
-                << " - Time since last print: " << l_elapsedMs << "ms\n";
+            << " - Time since last print: " << l_elapsedMs << "ms\n";
 
         // Check if we exceed duration
         if (std::chrono::steady_clock::now() - l_startTime >= l_duration)
@@ -54,7 +54,7 @@ int main()
 
     float f = 0.5f;
     DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
-   //
+    //
     LoopTests();
     getchar();
     return 0;
