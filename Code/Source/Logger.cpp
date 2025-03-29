@@ -87,15 +87,15 @@ namespace Debug
 
     void Logger::PrintLogs()
     {
+        CheckLogFileSize();
         while (!m_stopLogger)
         {
             if (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
-            {
-                if (!m_logFile.is_open()) { m_logFile << *l_log << "\n"; }
-            }
-            else { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
+                if (!m_logFile.is_open())
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                else
+                    m_logFile << *l_log << "\n";
         }
-        CheckLogFileSize();
     }
 
     void Logger::StopThread()
@@ -106,25 +106,28 @@ namespace Debug
             m_loggingThread.join();
     }
 
-    void Logger::RotateLogs()
-    {
-        m_logFile.close();
-        for (size_t i = m_maxFiles - 1; i > 0; --i)
-        {
-            std::filesystem::rename(fmt::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_SUFFIX, LOG_FILE_FORMAT),
-                                    fmt::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_SUFFIX, LOG_FILE_FORMAT));
-        }
-        std::filesystem::rename(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT),
-                                fmt::format("{}-1{}{}", m_logFilename, OLD_FILE_SUFFIX, LOG_FILE_FORMAT));
-
-        m_logFile.open(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::trunc);
-    }
-
     void Logger::CheckLogFileSize()
     {
         const std::string l_latestFile = fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
         if (std::filesystem::exists(l_latestFile) && std::filesystem::file_size(l_latestFile) >= m_maxFileSize)
             RotateLogs();
+    }
+
+    void Logger::RotateLogs()
+    {
+        m_logFile.close();
+        for (size_t i = m_maxFiles - 1; i > 0; --i)
+        {
+            std::string l_oldFile = fmt::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_SUFFIX, LOG_FILE_FORMAT);
+            std::string l_newFile = fmt::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_SUFFIX, LOG_FILE_FORMAT);
+
+            if (std::filesystem::exists(l_oldFile))
+                std::filesystem::rename(l_oldFile, l_newFile);
+        }
+        std::filesystem::rename(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT),
+                                fmt::format("{}-1{}{}", m_logFilename, OLD_FILE_SUFFIX, LOG_FILE_FORMAT));
+
+        m_logFile.open(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::trunc);
     }
 
     std::string Logger::GetSourceLocation(const std::source_location& a_location = std::source_location::current())
@@ -181,7 +184,7 @@ namespace Debug
             return "INFO       ";
         case LogLevel::WARNING :
             return "WARNING    ";
-        case LogLevel::ERROR       :
+        case LogLevel::ERROR :
             return "ERROR";
         case LogLevel::CRITICAL :
             return "CRITICAL   ";
