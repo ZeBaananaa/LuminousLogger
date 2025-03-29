@@ -9,6 +9,7 @@
 #include "LockFreeQueue.hpp"
 #include "LogLevel.hpp"
 #include "Utils.hpp"
+#include "fmt/os.h"
 
 using Debug::Utils::operator""_MiB;
 

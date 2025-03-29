@@ -9,16 +9,17 @@
 #include <sstream>
 #include <thread>
 
-constexpr std::string_view LATEST_LOG_FILE_NAME{"-latest"};
+#include "fmt/format.h"
+
+constexpr std::string_view LATEST_LOG_FILE_SUFFIX{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
-constexpr std::string_view OLD_FILE_TEXT{".old"};
+constexpr std::string_view OLD_FILE_SUFFIX{".old"};
 
 namespace Debug
 {
     // Creates a queue with a capacity of 100 messages.
-    Logger::Logger() : m_logQueue(64)
-    {
-    }
+    Logger::Logger() :
+        m_logQueue(64) {}
 
     Logger::~Logger()
     {
@@ -28,14 +29,12 @@ namespace Debug
             m_logFile.close();
     }
 
-    Logger::Logger(const Logger& a_copy) : m_logQueue(a_copy.m_logQueue.GetCapacity()),
-                                           m_logFilename(a_copy.m_logFilename),
-                                           m_maxFileSize(a_copy.m_maxFileSize),
-                                           m_maxFiles(a_copy.m_maxFiles),
-                                           m_useColors(a_copy.m_useColors)
-    {
-        std::cout << "Logger was copied then deleted!\n";
-    }
+    Logger::Logger(const Logger& a_copy) :
+        m_logQueue(a_copy.m_logQueue.GetCapacity()),
+        m_logFilename(a_copy.m_logFilename),
+        m_maxFileSize(a_copy.m_maxFileSize),
+        m_maxFiles(a_copy.m_maxFiles),
+        m_useColors(a_copy.m_useColors) { std::cout << "Logger was copied then deleted!\n"; }
 
     Logger& Logger::operator=(const Logger& a_other)
     {
@@ -55,7 +54,7 @@ namespace Debug
 
     Logger& Logger::GetInstance()
     {
-        static Logger s_instance{};
+        static Logger s_instance{ };
         return s_instance;
     }
 
@@ -68,12 +67,12 @@ namespace Debug
         m_maxFiles = a_maxFiles;
         m_useColors = a_useColors;
 
-        m_logFile.open(a_filename + std::string(LATEST_LOG_FILE_NAME) + std::string(LOG_FILE_FORMAT),
+        m_logFile.open(fmt::format("{}{}{}", a_filename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT),
                        std::ios::out | std::ios::app | std::ios::ate);
 
         if (!m_logFile.is_open())
-            std::cerr << "File " + m_logFilename << LATEST_LOG_FILE_NAME << LOG_FILE_FORMAT <<
-                    " could not be opened!\n";
+            fmt::print(stderr, "File {}{}{} could not be opened!\n", m_logFilename, LATEST_LOG_FILE_SUFFIX,
+                       LOG_FILE_FORMAT);
 
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
@@ -86,24 +85,18 @@ namespace Debug
         const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
 
         m_logQueue.PushLogToQueue(l_formattedLogFileMsg);
-        std::cout << l_formattedConsoleMsg << "\n";
+        fmt::print("{}\n", l_formattedConsoleMsg);
     }
 
     void Logger::PrintLogs()
     {
-        size_t l_logCount = 0;
-
         while (!m_stopLogger)
         {
             if (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
             {
-                if (m_logFile.is_open())
-                {
-                    m_logFile << *l_log << "\n";
-                    ++l_logCount;
-                }
-            } else
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                if (!m_logFile.is_open()) { m_logFile << *l_log << "\n"; }
+            }
+            else { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
         }
         CheckLogFileSize();
     }
@@ -121,23 +114,18 @@ namespace Debug
         m_logFile.close();
         for (size_t i = m_maxFiles - 1; i > 0; --i)
         {
-            std::string l_oldFile = std::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_TEXT, LOG_FILE_FORMAT);
-            std::string l_newFile = std::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_TEXT, LOG_FILE_FORMAT);
-
-            if (std::filesystem::exists(l_oldFile))
-                std::filesystem::rename(l_oldFile, l_newFile);
+            std::filesystem::rename(fmt::format("{}-{}{}{}", m_logFilename, i, OLD_FILE_SUFFIX, LOG_FILE_FORMAT),
+                                    fmt::format("{}-{}{}{}", m_logFilename, i + 1, OLD_FILE_SUFFIX, LOG_FILE_FORMAT));
         }
+        std::filesystem::rename(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT),
+                                fmt::format("{}-1{}{}", m_logFilename, OLD_FILE_SUFFIX, LOG_FILE_FORMAT));
 
-        const std::string l_latestFile = std::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_NAME, LOG_FILE_FORMAT);
-        const std::string l_rotatedFile = std::format("{}-1{}{}", m_logFilename, OLD_FILE_TEXT, LOG_FILE_FORMAT);
-        std::filesystem::rename(l_latestFile, l_rotatedFile);
-
-        m_logFile.open(l_latestFile, std::ios::trunc);
+        m_logFile.open(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::trunc);
     }
 
     void Logger::CheckLogFileSize()
     {
-        const std::string l_latestFile = std::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_NAME, LOG_FILE_FORMAT);
+        const std::string l_latestFile = std::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
         if (std::filesystem::exists(l_latestFile) && std::filesystem::file_size(l_latestFile) >= m_maxFileSize)
             RotateLogs();
     }
@@ -151,8 +139,7 @@ namespace Debug
 
         const std::filesystem::path l_relativePath = std::filesystem::relative(l_fullPath, l_baseDir);
 
-        return std::format("{} ({}:{}) - {}", l_relativePath.string(), a_location.line(), a_location.column(),
-                           a_location.function_name());
+        return fmt::format("{} ({}:{}) - {}", l_relativePath.string(), a_location.line(), a_location.column(), a_location.function_name());
     }
 
     std::filesystem::path Logger::FindProjectRoot(const std::filesystem::path& a_startPath)
@@ -174,22 +161,14 @@ namespace Debug
                                       const std::source_location& a_location) const
     {
         const std::chrono::time_point l_now{std::chrono::system_clock::now()};
-        const time_t l_time{std::chrono::system_clock::to_time_t(l_now)};
-
-        std::ostringstream l_timeStr{};
-        tm l_ltm{};
-
-        if (localtime_s(&l_ltm, &l_time) == 0)
-            l_timeStr << std::put_time(&l_ltm, "%Y-%m-%d %H:%M:%S");
-        else
-            l_timeStr << "Invalid Time";
+        std::string l_timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", l_now);
 
         if (m_useColors && a_useColors)
-            return std::format("{} [ {} ] - [ {} ] : {}{}{}", LogLevelToString(a_level, true), l_timeStr.str(),
+            return fmt::format("{} [{}] - [{}] : {}{}{}", LogLevelToString(a_level, true), l_timestamp,
                                GetSourceLocation(a_location), s_LogLevelColor.at(a_level), a_message,
                                ColorMap.at(ColorEnum::RESET));
 
-        return std::format("{} [ {} ] - [ {} ] : {}", LogLevelToString(a_level, false), l_timeStr.str(),
+        return fmt::format("{} [{}] - [{}] : {}", LogLevelToString(a_level, false), l_timestamp,
                            GetSourceLocation(a_location), a_message);
     }
 
@@ -204,12 +183,9 @@ namespace Debug
             {LogLevel::CRITICAL, "CRITICAL   "}
         };
 
-        const auto l_it = l_logLevelStrings.find(a_level);
-        std::string l_logString = l_it != l_logLevelStrings.end() ? l_it->second : "UNSPECIFIED    ";
-
-        if (m_useColors && a_useColors)
-            return std::format("{}{} : {}", s_LogLevelColor.at(a_level), l_logString, ResetColor);
-
-        return l_logString;
+        std::string l_levelStr = l_logLevelStrings.at(a_level);
+        return (m_useColors && a_useColors)
+            ? fmt::format("{}{}{}", s_LogLevelColor.at(a_level), l_levelStr, ColorMap.at(ColorEnum::RESET))
+            : l_levelStr;
     }
 }

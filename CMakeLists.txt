@@ -25,6 +25,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+add_subdirectory(Libs)
+
 
 #---------------------------------------#
 #                SOURCES                #
@@ -64,6 +66,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Disable C and C++ compiler extensions.
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+target_link_libraries(L_LOGGER PUBLIC fmt::fmt)
 
 
 #---------------------------------------#
