@@ -5,12 +5,16 @@ A simple async logger made for the LuminousEngine project @ ISART Digital Paris 
 
 ## Features:
 - Singleton-type logger
-- Async log writing to file to avoid locking the main thread
+- Separated thread assigned to the logger to perform async file writing
+- Uses the lock-free FIFO concept
 - Prints the date, relative log path, line and column of the log
 - Ability to chose the log file name
 - Supports file rotation based on a customizable max file size
 - Supports different levels of logging
 - Ability to customize the maximum amount of logging files
+- Assertion support
+- Color support (this can be disabled)
+- Support for both macros and logging functions
 - Lightweight
 
 
