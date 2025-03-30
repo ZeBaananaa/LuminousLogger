@@ -6,6 +6,7 @@
 #include <source_location>
 #include <thread>
 
+#include "AssertLevel.hpp"
 #include "LockFreeQueue.hpp"
 #include "LogLevel.hpp"
 #include "Utils.hpp"
@@ -14,12 +15,24 @@
 
 using Debug::Utils::operator""_MiB;
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <intrin.h>
+#define DEBUG_BREAK() __debugbreak()
+#else
+#include <csignal>
+#define DEBUG_BREAK() std::raise(SIGTRAP)
+#endif
+
 #define DEBUG_LOG(level, ...) Debug::Logger::GetInstance().Log(level, ##__VA_ARGS__)
 #define DEBUG_LOG_VERBOSE(...) Debug::Logger::GetInstance().LogVerbose(__VA_ARGS__)
 #define DEBUG_LOG_INFO(...) Debug::Logger::GetInstance().LogInfo(__VA_ARGS__)
 #define DEBUG_LOG_WARNING(...) Debug::Logger::GetInstance().LogWarning(__VA_ARGS__)
 #define DEBUG_LOG_ERROR(...) Debug::Logger::GetInstance().LogError(__VA_ARGS__)
 #define DEBUG_LOG_CRITICAL(...) Debug::Logger::GetInstance().LogCritical(__VA_ARGS__)
+
+#define LOG_ASSERT(condition, level, ...) Debug::Logger::GetInstance().HandleAssertion((condition), (level), ##__VA_ARGS__)
+#define LOG_ASSERT_WARN(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::WARN, ##__VA_ARGS__)
+#define LOG_ASSERT_ERROR(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::ERROR, ##__VA_ARGS__)
 
 namespace Debug
 {
@@ -72,10 +85,13 @@ namespace Debug
         template <typename... LogMessage>
         void Log(LogLevel a_level, FormatLocation a_formatLoc, LogMessage&&... a_message);
 
-        void LogInternal(LogLevel a_level, const std::source_location& a_location, const std::string& a_message);
+        template <typename... LogMessage>
+        void HandleAssertion(bool a_condition, AssertLevel a_level, FormatLocation a_formatLoc, LogMessage&&... a_message);
+
+        void FlushLogs();
 
     private:
-        explicit Logger();
+        explicit Logger() = default;
         ~Logger();
 
         Logger(const Logger&); // Prevents singleton copy
@@ -83,6 +99,7 @@ namespace Debug
 
         void PrintLogs();
         void StopThread();
+        void LogInternal(LogLevel a_level, const std::source_location& a_location, const std::string& a_message);
 
         /**
          * @brief Helper function to trigger log file rotation
@@ -134,7 +151,7 @@ namespace Debug
         static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
         std::thread m_loggingThread{ };
-        LockFreeQueue m_logQueue{64};
+        LockFreeQueue m_logQueue{ 24 };
 
         bool m_stopLogger = false;
         std::ofstream m_logFile{ };

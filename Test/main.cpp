@@ -14,13 +14,13 @@ void LoopTests()
 
     const std::chrono::time_point<std::chrono::steady_clock> l_startTime = std::chrono::steady_clock::now();
     // Record start time
-    const std::chrono::seconds l_duration = std::chrono::seconds(15); // Set logging duration to x seconds
+    const std::chrono::seconds l_duration = std::chrono::seconds(5); // Set logging duration to x seconds
     int l_messageCount = 0; // Amount of messages logged
 
     while (true)
     {
         auto l_loopStartTime = std::chrono::steady_clock::now(); // Record the time of each iteration
-        std::this_thread::sleep_for(std::chrono::milliseconds(0)); // Wait x ms after next print
+        std::this_thread::sleep_for(std::chrono::milliseconds(125)); // Wait x ms after next print
 
         // Compute elapsed time
         auto l_elapsedTime = std::chrono::steady_clock::now() - l_loopStartTime;
@@ -41,21 +41,26 @@ void LoopTests()
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    DEBUG_LOG_INFO("LOG ENDED");
     std::cout << "\nLoop ended after 15s\n";
     std::cout << "Total messages printed: " << l_messageCount;
 }
 
 int main()
 {
-    /*Debug::Logger& l_logger = Debug::Logger::GetInstance();
+    Debug::Logger& l_logger = Debug::Logger::GetInstance();
+    l_logger.Init("app", 1_MiB, 5, true);
+    //float f = 0.5f;
+    //DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
 
-    // Define the log file name, the size (in MiB), the max file count and toggle color support
-    l_logger.Init("app", 1_MiB, 5, true);*/
+    //LoopTests();
 
-    float f = 0.5f;
-    DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
-    //
-    LoopTests();
-    getchar();
+    int health = -10;
+    LOG_ASSERT(health >= 0, Debug::AssertLevel::WARN, "1. Health cannot be negative! Value: {}", health);
+    int playerID = -1;
+    LOG_ASSERT_WARN(playerID >= 0, "1. Player ID is invalid! ID: {}", playerID);
+
+    LOG_ASSERT(health >= 0, Debug::AssertLevel::ERROR, "2. Health cannot be negative! Value: {}", health);
+    LOG_ASSERT_ERROR(playerID >= 0, "2. Player ID is invalid! ID: {}", playerID);
     return 0;
 }

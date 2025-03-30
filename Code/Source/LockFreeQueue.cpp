@@ -1,5 +1,7 @@
 #include "LockFreeQueue.hpp"
 
+#include <iostream>
+
 namespace Debug
 {
     bool LockFreeQueue::PushLogToQueue(const std::string& a_log)
@@ -30,10 +32,8 @@ namespace Debug
 
             if (l_currentHead == m_tail.load(std::memory_order_acquire))
                 return std::nullopt;
-        }
-        // Bitwise operation used for better optimization than the '%' sign (only when queue capacity is a power of 2)
-        while (!m_head.compare_exchange_weak(l_currentHead, (l_currentHead + 1) & (m_capacity - 1), std::memory_order_release, std::memory_order_relaxed));
 
+        } while (!m_head.compare_exchange_weak(l_currentHead, (l_currentHead + 1) & (m_capacity - 1), std::memory_order_release, std::memory_order_relaxed)); // Bitwise operation used for better optimization than the '%' sign (only when queue capacity is a power of 2)
         return m_data[l_currentHead];;
     }
 }

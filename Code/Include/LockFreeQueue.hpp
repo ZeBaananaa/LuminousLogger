@@ -17,6 +17,7 @@ namespace Debug
         std::optional<std::string> PopLogFromQueue();
 
         size_t GetCapacity() const { return m_capacity; }
+        bool IsEmpty() const { return m_head.load(std::memory_order_acquire) == m_tail.load(std::memory_order_acquire); }
 
     private:
         const size_t m_capacity{ };

@@ -14,10 +14,6 @@ constexpr std::string_view OLD_FILE_SUFFIX{".old"};
 
 namespace Debug
 {
-    // Creates a queue with a capacity of 100 messages.
-    Logger::Logger() :
-        m_logQueue(64) {}
-
     Logger::~Logger()
     {
         StopThread();
@@ -27,11 +23,11 @@ namespace Debug
     }
 
     Logger::Logger(const Logger& a_copy) :
-        m_logQueue(a_copy.m_logQueue.GetCapacity()),
-        m_logFilename(a_copy.m_logFilename),
-        m_maxFileSize(a_copy.m_maxFileSize),
-        m_maxFiles(a_copy.m_maxFiles),
-        m_useColors(a_copy.m_useColors) { std::cout << "Logger was copied then deleted!\n"; }
+        m_logQueue(a_copy.m_logQueue.GetCapacity()), m_logFilename(a_copy.m_logFilename),
+        m_maxFileSize(a_copy.m_maxFileSize), m_maxFiles(a_copy.m_maxFiles), m_useColors(a_copy.m_useColors)
+    {
+        std::cout << "Logger was copied then deleted!\n";
+    }
 
     Logger& Logger::operator=(const Logger& a_other)
     {
@@ -74,8 +70,7 @@ namespace Debug
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
 
-    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location,
-                             const std::string& a_message)
+    void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location, const std::string& a_message)
     {
         std::lock_guard l_lock(m_logMutex);
         const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
@@ -88,13 +83,16 @@ namespace Debug
     void Logger::PrintLogs()
     {
         CheckLogFileSize();
-        while (!m_stopLogger)
+        while (!m_stopLogger || !m_logQueue.IsEmpty())
         {
-            if (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
-                if (!m_logFile.is_open())
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                else
+            std::optional<std::string> l_log = m_logQueue.PopLogFromQueue();
+            if (l_log)
+            {
+                if (m_logFile.is_open())
                     m_logFile << *l_log << "\n";
+            }
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 
@@ -103,7 +101,10 @@ namespace Debug
         m_stopLogger = true;
 
         if (m_loggingThread.joinable())
+        {
+            m_logFile.flush();
             m_loggingThread.join();
+        }
     }
 
     void Logger::CheckLogFileSize()
@@ -159,19 +160,19 @@ namespace Debug
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors,
                                       const std::source_location& a_location) const
     {
-        const std::chrono::time_point l_now{std::chrono::system_clock::now()};
+        const std::chrono::time_point l_now = std::chrono::time_point_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now());
         const std::string l_timestamp = fmt::format("{:%Y-%m-%d %H:%M:%S}", l_now);
 
         if (m_useColors && a_useColors)
         {
             const fmt::text_style l_logStyle = GetLogColor(a_level);
-            return fmt::format("{} [{}] - [{}] : {}",
-                               fmt::styled(LogLevelToString(a_level), l_logStyle),
-                               l_timestamp, GetSourceLocation(a_location), fmt::styled(a_message, l_logStyle));
+            return fmt::format("{} [{}] - [{}] : {}", fmt::styled(LogLevelToString(a_level), l_logStyle), l_timestamp,
+                               GetSourceLocation(a_location), fmt::styled(a_message, l_logStyle));
         }
 
-        return fmt::format("{} [{}] - [{}] : {}", LogLevelToString(a_level), l_timestamp,
-                           GetSourceLocation(a_location), a_message);
+        return fmt::format("{} [{}] - [{}] : {}", LogLevelToString(a_level), l_timestamp, GetSourceLocation(a_location),
+                           a_message);
     }
 
     std::string Logger::LogLevelToString(const LogLevel a_level)
@@ -185,7 +186,7 @@ namespace Debug
         case LogLevel::WARNING :
             return "WARNING    ";
         case LogLevel::ERROR :
-            return "ERROR";
+            return "ERROR      ";
         case LogLevel::CRITICAL :
             return "CRITICAL   ";
         default :
@@ -210,5 +211,11 @@ namespace Debug
         default :
             return fmt::fg(fmt::color::white);
         }
+    }
+
+    void Logger::FlushLogs()
+    {
+        while (std::optional<std::string> l_log = m_logQueue.PopLogFromQueue())
+            m_logFile << *l_log << "\n";
     }
 }
