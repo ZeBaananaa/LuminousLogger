@@ -39,6 +39,19 @@ void PrintLogs()
 
 ## Screenshots
 
-![Console Output Screenshot](https://i.imgur.com/YP0GNJu.png)
+![Console Output Screenshot](https://i.imgur.com/98pWgKC.png)
 
-![Log File Screenshot](https://i.imgur.com/ClK0zRq.png)
+
+### Console Output
+
+```log
+VERBOSE     [2025-03-30 20:23:29] - [main.cpp (55:76) - int main()] : 0.1 true 0.5 1585485145 -52, test
+INFO        [2025-03-30 20:23:29] - [main.cpp (58:30) - int main()] : false
+WARNING     [2025-03-30 20:23:29] - [main.cpp (59:53) - int main()] : Warning message : 5.025
+ERROR       [2025-03-30 20:23:29] - [main.cpp (60:36) - int main()] : Error message
+CRITICAL    [2025-03-30 20:23:29] - [main.cpp (61:41) - int main()] : Crtical message
+VERBOSE     [2025-03-30 20:23:29] - [main.cpp (64:66) - int main()] : VERBOSE MESSAGE : -10456555854645
+WARNING     [2025-03-30 20:23:29] - [main.cpp (67:104) - int main()] : 1. Health cannot be negative! Value: -10
+WARNING     [2025-03-30 20:23:29] - [main.cpp (69:79) - int main()] : 1. Player ID is invalid! ID: -1
+ERROR       [2025-03-30 20:23:29] - [main.cpp (71:105) - int main()] : 2. Health cannot be negative! Value: -10
+```
