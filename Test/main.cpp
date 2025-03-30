@@ -50,10 +50,18 @@ int main()
 {
     Debug::Logger& l_logger = Debug::Logger::GetInstance();
     l_logger.Init("app", 1_MiB, 5, true);
-    //float f = 0.5f;
-    //DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
 
-    //LoopTests();
+    float f = 0.5f;
+    DEBUG_LOG_VERBOSE("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
+
+    bool test = false;
+    DEBUG_LOG_INFO("{}", test);
+    DEBUG_LOG_WARNING("Warning message : {}", 5.025f);
+    DEBUG_LOG_ERROR("Error message");
+    DEBUG_LOG_CRITICAL("Crtical message");
+
+    long long t = -10456555854645;
+    DEBUG_LOG(Debug::LogLevel::VERBOSE, "VERBOSE MESSAGE : {}", t);
 
     int health = -10;
     LOG_ASSERT(health >= 0, Debug::AssertLevel::WARN, "1. Health cannot be negative! Value: {}", health);
