@@ -7,7 +7,6 @@ A simple async logger made for the LuminousEngine project @ ISART Digital Paris 
 - Singleton-type logger
 - Async log writing to file to avoid locking the main thread
 - Prints the date, relative log path, line and column of the log
-- Ability to manually flush the loggingQueue when parsing critical logs
 - Ability to chose the log file name
 - Supports file rotation based on a customizable max file size
 - Supports different levels of logging
@@ -23,27 +22,17 @@ A simple async logger made for the LuminousEngine project @ ISART Digital Paris 
 void PrintLogs()
 {
     Debug::Logger& l_logger = Debug::Logger::GetInstance();
+    l_logger.Init("app", 1_MiB, 5, true);
+    float f = 0.5f;
+    DEBUG_LOG_INFO("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
 
-    // Define the log file name, the size (in MiB) and the max file count
-    l_logger.SetLogFile("app", 1_MiB, 5);
+    int health = -10;
+    LOG_ASSERT(health >= 0, Debug::AssertLevel::WARN, "1. Health cannot be negative! Value: {}", health);
+    int playerID = -1;
+    LOG_ASSERT_WARN(playerID >= 0, "1. Player ID is invalid! ID: {}", playerID);
 
-    l_logger.LogVerbose("Test Verbose Message!");
-    l_logger.LogInfo("Application is running");
-    l_logger.LogWarning("Test Warning Message");
-    l_logger.LogError("Test Error Message");
-    l_logger.LogCritical("Test Critical Message")
-    ;
-    l_logger.Log(Debug::LogLevel::VERBOSE, 1);
-    l_logger.Log(Debug::LogLevel::VERBOSE, 1.025f);
-
-    double test{1.2564484861878545};
-    l_logger.Log(Debug::LogLevel::VERBOSE, test);
-
-    float t{0.155654986465465f};
-    l_logger.Log(Debug::LogLevel::VERBOSE, t);
-
-    bool b{false};
-    l_logger.Log(Debug::LogLevel::VERBOSE, b);
+    LOG_ASSERT(health >= 0, Debug::AssertLevel::ERROR, "2. Health cannot be negative! Value: {}", health);
+    LOG_ASSERT_ERROR(playerID >= 0, "2. Player ID is invalid! ID: {}", playerID);
 }
 ```
 
