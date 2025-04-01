@@ -7,11 +7,11 @@ cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
-        VERSION 1.0.7
+        VERSION 1.0.8
         LANGUAGES CXX)
 
 # Define output build folder
-set(LL_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/Builds/${CMAKE_CXX_COMPILER_ID}_$<CONFIG>")
+set(LL_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/Builds/${CMAKE_CXX_COMPILER_ID}_${CMAKE_BUILD_TYPE}")
 
 # Define Output Build path for libraries & executable
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LL_OUTPUT_DIR}/Libs")
