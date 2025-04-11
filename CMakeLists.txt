@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
-        VERSION 1.0.8
+        VERSION 1.0.9
         LANGUAGES CXX)
 
 # Define output build folder
