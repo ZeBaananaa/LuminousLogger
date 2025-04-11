@@ -10,8 +10,7 @@ namespace Debug
     class LockFreeQueue
     {
     public:
-        explicit LockFreeQueue(const size_t a_capacity) :
-            m_capacity{a_capacity}, m_head{0}, m_tail{0}, m_data(a_capacity) {}
+        explicit LockFreeQueue(const size_t a_capacity) : m_capacity{a_capacity}, m_head{0}, m_tail{0}, m_data(a_capacity) {}
 
         bool TryEnqueue(const std::string& a_log);
         std::optional<std::string> PopLogFromQueue();

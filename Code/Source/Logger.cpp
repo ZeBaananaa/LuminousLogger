@@ -22,9 +22,7 @@ namespace Debug
             m_logFile.close();
     }
 
-    Logger::Logger(const Logger& a_copy) :
-        m_logQueue(a_copy.m_logQueue.GetCapacity()), m_logFilename(a_copy.m_logFilename),
-        m_maxFileSize(a_copy.m_maxFileSize), m_maxFiles(a_copy.m_maxFiles), m_useColors(a_copy.m_useColors)
+    Logger::Logger(const Logger& a_copy) : m_logQueue(a_copy.m_logQueue.GetCapacity()), m_logFilename(a_copy.m_logFilename), m_maxFileSize(a_copy.m_maxFileSize), m_maxFiles(a_copy.m_maxFiles), m_useColors(a_copy.m_useColors)
     {
         std::cout << "Logger was copied then deleted!\n";
     }
@@ -51,8 +49,7 @@ namespace Debug
         return s_instance;
     }
 
-    void Logger::Init(const std::string& a_filename, const size_t a_maxFileSize, const size_t a_maxFiles,
-                      const bool a_useColors)
+    void Logger::Init(const std::string& a_filename, const size_t a_maxFileSize, const size_t a_maxFiles, const bool a_useColors)
     {
         std::lock_guard<std::mutex> l_lock(m_logMutex);
         m_logFilename = a_filename;
@@ -60,12 +57,10 @@ namespace Debug
         m_maxFiles = a_maxFiles;
         m_useColors = a_useColors;
 
-        m_logFile.open(fmt::format("{}{}{}", a_filename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT),
-                       std::ios::out | std::ios::app | std::ios::ate);
+        m_logFile.open(fmt::format("{}{}{}", a_filename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::out | std::ios::app | std::ios::ate);
 
         if (!m_logFile.is_open())
-            fmt::print(stderr, "File {}{}{} could not be opened!\n", m_logFilename, LATEST_LOG_FILE_SUFFIX,
-                       LOG_FILE_FORMAT);
+            fmt::print(stderr, "File {}{}{} could not be opened!\n", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
 
         m_loggingThread = std::thread(&Logger::PrintLogs, this);
     }
@@ -76,7 +71,9 @@ namespace Debug
         const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
         const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
 
-        m_logQueue.PushLogToQueue(l_formattedLogFileMsg);
+        while (!m_logQueue.TryEnqueue(l_formattedLogFileMsg))
+            std::this_thread::sleep_for(std::chrono::microseconds(50));
+
         fmt::print("{}\n", l_formattedConsoleMsg);
     }
 
@@ -94,6 +91,9 @@ namespace Debug
             else
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+
+        if (m_logFile.is_open())
+            m_logFile.flush();
     }
 
     void Logger::StopThread()
@@ -102,8 +102,11 @@ namespace Debug
 
         if (m_loggingThread.joinable())
         {
-            m_logFile.flush();
             m_loggingThread.join();
+            FlushLogs();
+
+            if (m_logFile.is_open())
+                m_logFile.flush();
         }
     }
 
