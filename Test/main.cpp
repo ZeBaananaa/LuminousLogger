@@ -7,15 +7,9 @@ using Debug::Utils::operator""_MiB;
 
 void LoopTests()
 {
-    Debug::Logger& l_logger = Debug::Logger::GetInstance();
-
-    // Define the log file name, the size (in MiB), the max file count and toggle color support
-    l_logger.Init("app", 1_MiB, 5, true);
-
-    const std::chrono::time_point<std::chrono::steady_clock> l_startTime = std::chrono::steady_clock::now();
-    // Record start time
+    const std::chrono::time_point<std::chrono::steady_clock> l_startTime = std::chrono::steady_clock::now(); // Record start time
     const std::chrono::seconds l_duration = std::chrono::seconds(5); // Set logging duration to x seconds
-    int l_messageCount = 0; // Amount of messages logged
+    int l_messageCount = 0; // Number of messages logged
 
     while (true)
     {
@@ -35,7 +29,7 @@ void LoopTests()
         std::cout << "Message " << l_messageCount
             << " - Time since last print: " << l_elapsedMs << "ms\n";
 
-        // Check if we exceed duration
+        // Check if we exceed the duration
         if (std::chrono::steady_clock::now() - l_startTime >= l_duration)
             break; // End loop
     }
@@ -44,6 +38,8 @@ void LoopTests()
     DEBUG_LOG_INFO("LOG ENDED");
     std::cout << "\nLoop ended after 15s\n";
     std::cout << "Total messages printed: " << l_messageCount;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 
 int main()
@@ -51,14 +47,14 @@ int main()
     Debug::Logger& l_logger = Debug::Logger::GetInstance();
     l_logger.Init("app", 1_MiB, 5, true);
 
-    float f = 0.5f;
+    /*float f = 0.5f;
     DEBUG_LOG_VERBOSE("{} {} {} {} {}, test", 0.1, true, f, 1585485145, -52);
 
     bool test = false;
     DEBUG_LOG_INFO("{}", test);
     DEBUG_LOG_WARNING("Warning message : {}", 5.025f);
     DEBUG_LOG_ERROR("Error message");
-    DEBUG_LOG_CRITICAL("Crtical message");
+    DEBUG_LOG_CRITICAL("Critical message");
 
     long long t = -10456555854645;
     DEBUG_LOG(Debug::LogLevel::VERBOSE, "VERBOSE MESSAGE : {}", t);
@@ -69,6 +65,8 @@ int main()
     LOG_ASSERT_WARN(playerID >= 0, "1. Player ID is invalid! ID: {}", playerID);
 
     LOG_ASSERT(health >= 0, Debug::AssertLevel::ERROR, "2. Health cannot be negative! Value: {}", health);
-    LOG_ASSERT_ERROR(playerID >= 0, "2. Player ID is invalid! ID: {}", playerID);
+    LOG_ASSERT_ERROR(playerID >= 0, "2. Player ID is invalid! ID: {}", playerID);*/
+
+    LoopTests();
     return 0;
 }

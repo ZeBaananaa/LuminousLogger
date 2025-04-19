@@ -23,16 +23,16 @@ using Debug::Utils::operator""_MiB;
 #define DEBUG_BREAK() std::raise(SIGTRAP)
 #endif
 
-#define DEBUG_LOG(level, ...) Debug::Logger::GetInstance().Log(level, ##__VA_ARGS__)
-#define DEBUG_LOG_VERBOSE(...) Debug::Logger::GetInstance().LogVerbose(__VA_ARGS__)
-#define DEBUG_LOG_INFO(...) Debug::Logger::GetInstance().LogInfo(__VA_ARGS__)
-#define DEBUG_LOG_WARNING(...) Debug::Logger::GetInstance().LogWarning(__VA_ARGS__)
-#define DEBUG_LOG_ERROR(...) Debug::Logger::GetInstance().LogError(__VA_ARGS__)
-#define DEBUG_LOG_CRITICAL(...) Debug::Logger::GetInstance().LogCritical(__VA_ARGS__)
+#define DEBUG_LOG(level, ...) Debug::Logger::GetInstance().Log(level, Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define DEBUG_LOG_VERBOSE(...) Debug::Logger::GetInstance().LogVerbose(Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define DEBUG_LOG_INFO(...) Debug::Logger::GetInstance().LogInfo(Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define DEBUG_LOG_WARNING(...) Debug::Logger::GetInstance().LogWarning(Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define DEBUG_LOG_ERROR(...) Debug::Logger::GetInstance().LogError(Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define DEBUG_LOG_CRITICAL(...) Debug::Logger::GetInstance().LogCritical(Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
 
-#define LOG_ASSERT(condition, level, ...) Debug::Logger::GetInstance().HandleAssertion((condition), (level), ##__VA_ARGS__)
-#define LOG_ASSERT_WARN(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::WARN, ##__VA_ARGS__)
-#define LOG_ASSERT_ERROR(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::ERROR, ##__VA_ARGS__)
+#define LOG_ASSERT(condition, level, ...) Debug::Logger::GetInstance().HandleAssertion((condition), (level), Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define LOG_ASSERT_WARN(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::WARN, Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
+#define LOG_ASSERT_ERROR(condition, ...) Debug::Logger::GetInstance().HandleAssertion((condition), Debug::AssertLevel::ERROR, Debug::Logger::FormatLocation(fmt::format(__VA_ARGS__)))
 
 namespace Debug
 {
@@ -61,9 +61,7 @@ namespace Debug
             std::source_location location{ };
 
             template <typename LogMessage>
-            FormatLocation(LogMessage&& a_logMessage,
-                           const std::source_location a_location = std::source_location::current()) :
-                format{std::forward<LogMessage>(a_logMessage)}, location{a_location} {}
+            explicit FormatLocation(LogMessage&& a_logMessage, const std::source_location a_location = std::source_location::current()) : format{std::forward<LogMessage>(a_logMessage)}, location{a_location} {}
         };
 
 
@@ -151,7 +149,7 @@ namespace Debug
         static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
         std::thread m_loggingThread{ };
-        LockFreeQueue m_logQueue{ 24 };
+        LockFreeQueue m_logQueue{std::thread::hardware_concurrency() * 4};
 
         bool m_stopLogger = false;
         std::ofstream m_logFile{ };
@@ -162,6 +160,16 @@ namespace Debug
         size_t m_maxFiles{5};
 
         bool m_useColors{true};
+
+        static constexpr size_t batchSize { 100 };
+        static std::atomic<bool> s_emergencyFlush;
+        static void SignalHandler(int a_signal);
+
+        std::vector<std::string> m_logBuffer;
+        size_t m_bufferSize = 0;
+
+        void WriteBufferToFile();
+
     };
 }
 

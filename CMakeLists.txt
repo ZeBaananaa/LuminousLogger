@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Define Project Name
 project(LuminousLogger
-        VERSION 1.0.9
+        VERSION 1.1.0
         LANGUAGES CXX)
 
 # Define output build folder
@@ -22,9 +22,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-
 add_subdirectory(Libs)
 
 
@@ -37,7 +34,8 @@ file(GLOB_RECURSE L_LOGGER_SOURCES "Code/*.cpp")
 #---------------------------------------#
 #            BUILD MODE                 #
 #---------------------------------------#
-add_library(L_LOGGER STATIC ${L_LOGGER_SOURCES})
+add_library(L_LOGGER STATIC ${L_LOGGER_SOURCES}
+        Code/Source/Logger.tpp)
 
 
 #---------------------------------------#
