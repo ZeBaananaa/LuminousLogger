@@ -89,9 +89,13 @@ namespace Debug
 
     void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location, const std::string& a_message)
     {
-        std::lock_guard l_lock(m_logMutex);
-        const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
-        const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
+        std::string l_formattedConsoleMsg;
+        std::string l_formattedLogFileMsg;
+        {
+            std::lock_guard l_lock(m_logMutex);
+            l_formattedConsoleMsg = FormatMessage(a_level, ToString(a_message), true, a_location);
+            l_formattedLogFileMsg = FormatMessage(a_level, ToString(a_message), false, a_location);
+        };
 
         while (!m_logQueue.TryEnqueue(l_formattedLogFileMsg))
             std::this_thread::sleep_for(std::chrono::microseconds(50));
