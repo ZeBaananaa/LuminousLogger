@@ -1,6 +1,5 @@
 #include "Logger.hpp"
 
-#include <bemapiset.h>
 #include <chrono>
 #include <csignal>
 #include <filesystem>
