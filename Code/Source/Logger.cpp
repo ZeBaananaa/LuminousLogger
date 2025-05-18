@@ -1,5 +1,6 @@
 #include "Logger.hpp"
 
+#include <bemapiset.h>
 #include <chrono>
 #include <csignal>
 #include <filesystem>
@@ -9,6 +10,8 @@
 #include "fmt/chrono.h"
 #include "fmt/color.h"
 #include "fmt/format.h"
+
+#include "ProcessUtils.hpp"
 
 constexpr std::string_view LATEST_LOG_FILE_SUFFIX{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
@@ -67,14 +70,14 @@ namespace Debug
     void Logger::Init(const std::string& a_filename, const size_t a_maxFileSize, const size_t a_maxFiles, const bool a_useColors)
     {
         std::lock_guard<std::mutex> l_lock(m_logMutex);
-        m_logFilename = a_filename;
+        m_logFilename = GenerateUniqueLogFileName(a_filename);
         m_maxFileSize = a_maxFileSize;
         m_maxFiles = a_maxFiles;
         m_useColors = a_useColors;
 
         m_logBuffer.reserve(batchSize);
 
-        m_logFile.open(fmt::format("{}{}{}", a_filename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::out | std::ios::app | std::ios::ate);
+        m_logFile.open(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::out | std::ios::app | std::ios::ate);
 
         if (!m_logFile.is_open())
             fmt::print(stderr, "File {}{}{} could not be opened!\n", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
@@ -182,6 +185,17 @@ namespace Debug
         }
         return "/";
     }
+
+
+    std::string Logger::GenerateUniqueLogFileName(const std::string& a_baseName)
+    {
+        const int l_pid = GetProcessID();
+
+        std::ostringstream l_oss {};
+        l_oss << a_baseName << "-" << l_pid;
+        return l_oss.str();
+    }
+
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors, const std::source_location& a_location) const
     {
