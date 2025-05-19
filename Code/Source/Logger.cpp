@@ -10,6 +10,8 @@
 #include "fmt/color.h"
 #include "fmt/format.h"
 
+#include "ProcessUtils.hpp"
+
 constexpr std::string_view LATEST_LOG_FILE_SUFFIX{"-latest"};
 constexpr std::string_view LOG_FILE_FORMAT{".log"};
 constexpr std::string_view OLD_FILE_SUFFIX{".old"};
@@ -67,14 +69,14 @@ namespace Debug
     void Logger::Init(const std::string& a_filename, const size_t a_maxFileSize, const size_t a_maxFiles, const bool a_useColors)
     {
         std::lock_guard<std::mutex> l_lock(m_logMutex);
-        m_logFilename = a_filename;
+        m_logFilename = GenerateUniqueLogFileName(a_filename);
         m_maxFileSize = a_maxFileSize;
         m_maxFiles = a_maxFiles;
         m_useColors = a_useColors;
 
         m_logBuffer.reserve(batchSize);
 
-        m_logFile.open(fmt::format("{}{}{}", a_filename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::out | std::ios::app | std::ios::ate);
+        m_logFile.open(fmt::format("{}{}{}", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT), std::ios::out | std::ios::app | std::ios::ate);
 
         if (!m_logFile.is_open())
             fmt::print(stderr, "File {}{}{} could not be opened!\n", m_logFilename, LATEST_LOG_FILE_SUFFIX, LOG_FILE_FORMAT);
@@ -89,9 +91,13 @@ namespace Debug
 
     void Logger::LogInternal(const LogLevel a_level, const std::source_location& a_location, const std::string& a_message)
     {
-        std::lock_guard l_lock(m_logMutex);
-        const std::string l_formattedConsoleMsg{FormatMessage(a_level, ToString(a_message), true, a_location)};
-        const std::string l_formattedLogFileMsg{FormatMessage(a_level, ToString(a_message), false, a_location)};
+        std::string l_formattedConsoleMsg;
+        std::string l_formattedLogFileMsg;
+        {
+            std::lock_guard l_lock(m_logMutex);
+            l_formattedConsoleMsg = FormatMessage(a_level, ToString(a_message), true, a_location);
+            l_formattedLogFileMsg = FormatMessage(a_level, ToString(a_message), false, a_location);
+        };
 
         while (!m_logQueue.TryEnqueue(l_formattedLogFileMsg))
             std::this_thread::sleep_for(std::chrono::microseconds(50));
@@ -178,6 +184,17 @@ namespace Debug
         }
         return "/";
     }
+
+
+    std::string Logger::GenerateUniqueLogFileName(const std::string& a_baseName)
+    {
+        const int l_pid = GetProcessID();
+
+        std::ostringstream l_oss {};
+        l_oss << a_baseName << "-" << l_pid;
+        return l_oss.str();
+    }
+
 
     std::string Logger::FormatMessage(const LogLevel a_level, const std::string& a_message, const bool a_useColors, const std::source_location& a_location) const
     {

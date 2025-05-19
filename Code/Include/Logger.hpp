@@ -150,6 +150,8 @@ namespace Debug
          */
         static std::filesystem::path FindProjectRoot(const std::filesystem::path& a_startPath);
 
+        static std::string GenerateUniqueLogFileName(const std::string& a_baseName);
+
         std::thread m_loggingThread{ };
         LockFreeQueue m_logQueue{std::thread::hardware_concurrency() * 4};
 
