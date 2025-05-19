@@ -88,6 +88,8 @@ namespace Debug
 
         void FlushLogs();
 
+        inline std::vector<std::string> GetLogBuffer() const { return m_logBuffer; }
+
     private:
         explicit Logger() = default;
         ~Logger();
