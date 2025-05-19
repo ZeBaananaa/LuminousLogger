@@ -38,6 +38,15 @@ namespace Debug
 {
     class Logger
     {
+
+
+        struct LogEntry
+        {
+            LogLevel level;
+            std::string message;
+        };
+
+
     public:
         /**
           * @brief Function to get the instance of the logger
@@ -88,7 +97,8 @@ namespace Debug
 
         void FlushLogs();
 
-        inline std::vector<std::string> GetLogBuffer() const { return m_logBuffer; }
+        inline const std::vector<LogEntry>& GetLogBuffer() const { return m_externalLogBuffer; }
+
 
     private:
         explicit Logger() = default;
@@ -170,6 +180,7 @@ namespace Debug
         static void SignalHandler(int a_signal);
 
         std::vector<std::string> m_logBuffer;
+        std::vector<LogEntry> m_externalLogBuffer;
         size_t m_bufferSize = 0;
 
         void WriteBufferToFile();

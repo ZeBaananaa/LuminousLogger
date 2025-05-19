@@ -12,9 +12,10 @@
 
 #include "ProcessUtils.hpp"
 
-constexpr std::string_view LATEST_LOG_FILE_SUFFIX{"-latest"};
-constexpr std::string_view LOG_FILE_FORMAT{".log"};
-constexpr std::string_view OLD_FILE_SUFFIX{".old"};
+constexpr std::string_view LATEST_LOG_FILE_SUFFIX {"-latest"};
+constexpr std::string_view LOG_FILE_FORMAT {".log"};
+constexpr std::string_view OLD_FILE_SUFFIX {".old"};
+constexpr int MAX_LOG_LINES { 100 };
 
 namespace Debug
 {
@@ -97,6 +98,10 @@ namespace Debug
             std::lock_guard l_lock(m_logMutex);
             l_formattedConsoleMsg = FormatMessage(a_level, ToString(a_message), true, a_location);
             l_formattedLogFileMsg = FormatMessage(a_level, ToString(a_message), false, a_location);
+
+            m_externalLogBuffer.push_back(LogEntry{ a_level, l_formattedLogFileMsg });
+            if (m_externalLogBuffer.size() > MAX_LOG_LINES)
+                m_externalLogBuffer.erase(m_externalLogBuffer.begin());
         };
 
         while (!m_logQueue.TryEnqueue(l_formattedLogFileMsg))
