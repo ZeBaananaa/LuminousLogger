@@ -38,8 +38,7 @@ namespace Debug
 {
     class Logger
     {
-
-
+    public:
         struct LogEntry
         {
             LogLevel level;
@@ -47,7 +46,6 @@ namespace Debug
         };
 
 
-    public:
         /**
           * @brief Function to get the instance of the logger
           * @return The instance of the logger. Useful to print messages
